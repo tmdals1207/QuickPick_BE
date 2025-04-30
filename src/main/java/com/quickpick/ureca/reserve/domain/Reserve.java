@@ -1,5 +1,6 @@
 package com.quickpick.ureca.reserve.domain;
 
+import com.quickpick.ureca.user.domain.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,10 +20,11 @@ public class Reserve {
     @Column(name = "reserve_id")
     private Long reserveId;
 
-    @Column(name = "user_id", nullable = false)
-    private String userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @Column(name = "status", nullable = false)
+    @Column(nullable = false)
     private String status;
 
     @CreatedDate
