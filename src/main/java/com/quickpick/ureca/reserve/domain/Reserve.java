@@ -8,7 +8,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 
-@Table(name = "user")
+@Table
 @Entity
 @Getter
 @NoArgsConstructor
@@ -22,7 +22,7 @@ public class Reserve {
     @Column(name = "user_id", nullable = false)
     private String userId;
 
-    @Column(nullable = false)
+    @Column(name = "status", nullable = false)
     private String status;
 
     @CreatedDate

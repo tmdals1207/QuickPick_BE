@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Table(name = "user")
+@Table
 @Entity
 @Getter
 @NoArgsConstructor
@@ -22,19 +22,19 @@ public class User {
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(nullable = false)
+    @Column(name = "id", nullable = false)
     private String id;
 
-    @Column(nullable = false)
+    @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(name = "age", nullable = false)
     private String age;
 
-    @Column(nullable = false)
+    @Column(name = "gender", nullable = false)
     private String gender;
 
     @CreatedDate
@@ -43,8 +43,9 @@ public class User {
 
     @LastModifiedDate
     private LocalDateTime updated_at;
-
+/*
     @OneToMany
     @JoinColumn(name = "reserve_id")
     private List<Reserve> reserveList = new ArrayList<>();
+ */
 }
