@@ -22,19 +22,19 @@ public class User {
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(name = "id", nullable = false)
+    @Column(nullable = false)
     private String id;
 
-    @Column(name = "password", nullable = false)
+    @Column(nullable = false)
     private String password;
 
-    @Column(name = "name", nullable = false)
+    @Column(nullable = false)
     private String name;
 
-    @Column(name = "age", nullable = false)
+    @Column(nullable = false)
     private String age;
 
-    @Column(name = "gender", nullable = false)
+    @Column(nullable = false)
     private String gender;
 
     @CreatedDate
@@ -43,9 +43,5 @@ public class User {
 
     @LastModifiedDate
     private LocalDateTime updated_at;
-/*
-    @OneToMany
-    @JoinColumn(name = "reserve_id")
-    private List<Reserve> reserveList = new ArrayList<>();
- */
+
 }
