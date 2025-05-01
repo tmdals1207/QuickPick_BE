@@ -2,6 +2,7 @@ package com.quickpick.ureca.user.domain;
 
 import com.quickpick.ureca.reserve.domain.Reserve;
 import com.quickpick.ureca.ticket.domain.Ticket;
+import com.quickpick.ureca.userticket.domain.UserTicket;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -45,12 +46,7 @@ public class User {
     @LastModifiedDate
     private LocalDateTime updated_at;
 
-    @ManyToMany
-    @JoinTable(
-            name = "user_ticket",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "ticket_id")
-    )
-    private List<Ticket> tickets = new ArrayList<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserTicket> userTickets = new ArrayList<>();
 
 }
