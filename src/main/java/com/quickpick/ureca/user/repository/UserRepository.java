@@ -3,6 +3,8 @@ package com.quickpick.ureca.user.repository;
 import com.quickpick.ureca.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface UserRepository extends JpaRepository<User, Long> {
+import java.util.Optional;
 
+public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findById(String id);             //id로 사용자 정보 가져오기
 }

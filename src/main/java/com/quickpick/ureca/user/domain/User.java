@@ -3,6 +3,7 @@ package com.quickpick.ureca.user.domain;
 import com.quickpick.ureca.common.domain.BaseEntity;
 import com.quickpick.ureca.userticket.domain.UserTicket;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -34,10 +35,19 @@ public class User extends BaseEntity implements UserDetails {
     private String name;
 
     @Column(nullable = false)
-    private String age;
+    private Integer age;
 
     @Column(nullable = false)
     private String gender;
+
+    @Builder
+    public User(String id, String password, String name, Integer age, String gender) {
+        this.id = id;
+        this.password = password;
+        this.name = name;
+        this.age = age;
+        this.gender = gender;
+    }
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserTicket> userTickets = new ArrayList<>();

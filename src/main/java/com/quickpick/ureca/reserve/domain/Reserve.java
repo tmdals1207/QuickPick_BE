@@ -1,6 +1,7 @@
 package com.quickpick.ureca.reserve.domain;
 
 import com.quickpick.ureca.common.domain.BaseEntity;
+import com.quickpick.ureca.reserve.status.ReserveStatus;
 import com.quickpick.ureca.user.domain.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -21,6 +22,7 @@ public class Reserve extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status;
+    private ReserveStatus status;
 }
