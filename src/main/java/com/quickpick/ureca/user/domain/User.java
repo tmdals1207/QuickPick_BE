@@ -1,15 +1,11 @@
 package com.quickpick.ureca.user.domain;
 
-import com.quickpick.ureca.reserve.domain.Reserve;
-import com.quickpick.ureca.ticket.domain.Ticket;
+import com.quickpick.ureca.common.domain.BaseEntity;
 import com.quickpick.ureca.userticket.domain.UserTicket;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +13,7 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor
-public class User {
+public class User extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,13 +34,6 @@ public class User {
 
     @Column(nullable = false)
     private String gender;
-
-    @CreatedDate
-    @Column(updatable = false)
-    private LocalDateTime created_at;
-
-    @LastModifiedDate
-    private LocalDateTime updated_at;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserTicket> userTickets = new ArrayList<>();
