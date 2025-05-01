@@ -1,12 +1,10 @@
 package com.quickpick.ureca.ticket.domain;
 
-import com.quickpick.ureca.user.domain.User;
+import com.quickpick.ureca.common.domain.BaseEntity;
 import com.quickpick.ureca.userticket.domain.UserTicket;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
