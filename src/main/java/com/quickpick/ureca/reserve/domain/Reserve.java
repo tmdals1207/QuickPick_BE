@@ -1,5 +1,6 @@
 package com.quickpick.ureca.reserve.domain;
 
+import com.quickpick.ureca.common.domain.BaseEntity;
 import com.quickpick.ureca.user.domain.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor
-public class Reserve {
+public class Reserve extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,12 +27,4 @@ public class Reserve {
 
     @Column(nullable = false)
     private String status;
-
-    @CreatedDate
-    @Column(nullable = false)
-    private LocalDateTime created_at;
-
-    @LastModifiedDate
-    @Column(nullable = false)
-    private LocalDateTime updated_at;
 }
