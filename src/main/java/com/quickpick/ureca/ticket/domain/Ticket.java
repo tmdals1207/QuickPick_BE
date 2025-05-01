@@ -1,6 +1,7 @@
 package com.quickpick.ureca.ticket.domain;
 
 import com.quickpick.ureca.user.domain.User;
+import com.quickpick.ureca.userticket.domain.UserTicket;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -41,6 +42,6 @@ public class Ticket {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-    @ManyToMany(mappedBy = "tickets")
-    private List<User> users = new ArrayList<>();
+    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserTicket> userTickets = new ArrayList<>();
 }
