@@ -1,6 +1,7 @@
 package com.quickpick.ureca.user.service;
 
 import com.quickpick.ureca.user.domain.User;
+import com.quickpick.ureca.user.dto.UserLoginRequestDto;
 import com.quickpick.ureca.user.dto.UserSignUpRequestDto;
 import com.quickpick.ureca.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -25,4 +26,10 @@ public class UserService {
                 .gender(dto.getGender())
                 .build());
     }
+/*
+    public boolean login(UserLoginRequestDto dto) {
+
+    }
+
+ */
 }
