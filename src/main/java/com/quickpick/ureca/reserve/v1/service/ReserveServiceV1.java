@@ -26,7 +26,7 @@ public class ReserveServiceV1 {
     @Autowired
     private UserTicketRepositoryV1 userTicketRepositoryV1;
 
-//    // 티켓 예약 메서드 (락 X)
+//    // 티켓 예약 메서드 (락 X) Average : 586, Throughput : 17.5/sec
 //    @Transactional
 //    public void reserveTicket(Long userId, Long ticketId) {
 //        // 티켓과 사용자 가져오기
@@ -48,7 +48,7 @@ public class ReserveServiceV1 {
 //        userTicketRepositoryV1.save(userTicket);
 //    }
 
-    // 티켓 예약 메서드 (비관적 락) - Pessimistic Lock
+    // 티켓 예약 메서드 (비관적 락) - Pessimistic Lock Average : 802, Throughput : 15.6/sec
     @Transactional
     public void reserveTicket(Long userId, Long ticketId) {
 
