@@ -1,10 +1,12 @@
 package com.quickpick.ureca.ticket.v2.service;
 
-import com.quickpick.ureca.ticket.domain.Ticket;
 import com.quickpick.ureca.ticket.repository.TicketRepository;
+import com.quickpick.ureca.ticket.v2.domain.Ticket;
+import com.quickpick.ureca.ticket.v2.repository.TicketRepositoryV2;
 import com.quickpick.ureca.user.domain.User;
 import com.quickpick.ureca.user.repository.UserRepository;
-import com.quickpick.ureca.userticket.domain.UserTicket;
+import com.quickpick.ureca.userticket.v2.domain.UserTicket;
+import com.quickpick.ureca.userticket.v2.repository.UserTicketRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class TicketServiceImplV2 implements TicketServiceV2 {
-    private final TicketRepository ticketRepository;
+    private final TicketRepositoryV2 ticketRepository;
     private final UserRepository userRepository;
     private final UserTicketRepository userTicketRepository;
 

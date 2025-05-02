@@ -1,6 +1,6 @@
-package com.quickpick.ureca.userticket.domain;
+package com.quickpick.ureca.userticket.v2.domain;
 
-import com.quickpick.ureca.ticket.domain.Ticket;
+import com.quickpick.ureca.ticket.v2.domain.Ticket;
 import com.quickpick.ureca.user.domain.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -24,5 +24,10 @@ public class UserTicket {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ticket_id")
     private Ticket ticket;
+
+    public UserTicket(User user, Ticket ticket) {
+        this.user = user;
+        this.ticket = ticket;
+    }
 
 }

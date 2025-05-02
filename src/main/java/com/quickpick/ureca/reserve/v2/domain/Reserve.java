@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-public class ReserveV2 {
+public class Reserve {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "reserve_id")
