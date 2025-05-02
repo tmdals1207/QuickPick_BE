@@ -52,6 +52,8 @@ jobs:
           spring.jpa.properties.hibernate.show_sql=true
           spring.jpa.hibernate.ddl-auto=create-drop
           spring.jpa.properties.hibernate.format_sql=true
+          jwt.issuer=${{JWT_ISSUER}}
+          jwt.secret_key=${{JWT_SECRET_KEY}}
           EOT
         shell: bash
 

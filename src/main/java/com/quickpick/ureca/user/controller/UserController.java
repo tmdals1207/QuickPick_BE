@@ -15,7 +15,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestBody UserSignUpRequestDto dto){
+    public ResponseEntity<String> signup(@RequestBody UserSignUpRequestDto dto) {
         userService.saveUser(dto);
         return ResponseEntity.ok("회원가입 완료");
     }
@@ -30,15 +30,25 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패: 아이디 또는 비밀번호가 틀렸습니다.");
         }
     }
+*/
+/*
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody UserLoginRequestDto request) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+            );
 
-    @GetMapping("/logout")
-    public ResponseEntity<String> logout(@RequestBody UserLoginRequestDto dto){
-        boolean isSuccess = userService.login(dto);
+            User user = userService.findByUsername(request.getUsername());
+            String token = tokenProvider.generateToken(user, Duration.ofHours(2));
 
-        if (isSuccess) {
-            return ResponseEntity.ok("로그인 성공");
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패: 아이디 또는 비밀번호가 틀렸습니다.");
+            return ResponseEntity.ok(new TokenResponse(token));
+
+        } catch (AuthenticationException ex) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body("아이디 또는 비밀번호가 잘못되었습니다.");
         }
-    }*/
+    }
+    */
 }
