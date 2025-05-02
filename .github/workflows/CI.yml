@@ -52,6 +52,9 @@ jobs:
           spring.jpa.properties.hibernate.show_sql=true
           spring.jpa.hibernate.ddl-auto=create-drop
           spring.jpa.properties.hibernate.format_sql=true
+          
+          spring.data.redis.host=localhost
+          spring.data.redis.port=6379
           EOT
         shell: bash
 
