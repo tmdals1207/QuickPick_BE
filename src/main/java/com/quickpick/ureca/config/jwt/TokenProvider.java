@@ -64,9 +64,9 @@ public class TokenProvider {
                 , authorities);
     }
 
-    public String getUserId(String token) {
+    public Long getUserId(String token) {
         Claims claims = getClaims(token);
-        return claims.get("user_id", String.class);
+        return claims.get("user_id", Long.class);
     }
 
     private Claims getClaims(String token) {

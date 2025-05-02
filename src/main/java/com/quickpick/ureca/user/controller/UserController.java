@@ -19,7 +19,7 @@ public class UserController {
         userService.saveUser(dto);
         return ResponseEntity.ok("회원가입 완료");
     }
-
+/*
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody UserLoginRequestDto dto){
         boolean isSuccess = userService.login(dto);
@@ -40,5 +40,5 @@ public class UserController {
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패: 아이디 또는 비밀번호가 틀렸습니다.");
         }
-    }
+    }*/
 }

@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 @Getter
@@ -30,18 +31,31 @@ public class JwtFactory { //test용 jwt 토큰 생성
     }
 
     public static JwtFactory withDefaultValues() {
+
         return JwtFactory.builder().build();
     } // withDefaultValues
 
     public String createToken(JwtProperties jwtProperties) {
+        // 기본 클레임 설정
+        Map<String, Object> tokenClaims = new HashMap<>();
+
+        // 표준 클레임 추가
+        tokenClaims.put("sub", subject);                   // subject
+        tokenClaims.put("iss", jwtProperties.getIssuer()); // issuer
+        tokenClaims.put("iat", issuedAt);                  // issuedAt
+        tokenClaims.put("exp", expiration);                // expiration
+
+        // 사용자 정의 클레임 추가 (덮어쓰기 가능)
+        if (claims != null && !claims.isEmpty()) {
+            tokenClaims.putAll(claims);
+        }
+
         return Jwts.builder()
-                .subject(subject)
-                .setHeaderParam(Header.TYPE, Header.JWT_TYPE) // deprecated
-                .issuer(jwtProperties.getIssuer())
-                .issuedAt(issuedAt)
-                .expiration(expiration)
-                .addClaims(claims)
-                .signWith( Keys.hmacShaKeyFor( jwtProperties.getSecretKey().getBytes( StandardCharsets.UTF_8 ) ) )
+                .claims(tokenClaims)
+                .signWith(
+                        Keys.hmacShaKeyFor(jwtProperties.getSecretKey().getBytes(StandardCharsets.UTF_8)),
+                        Jwts.SIG.HS256 // 서명 알고리즘 명시 필수
+                )
                 .compact();
-    } // makeToken
+    }
 }
