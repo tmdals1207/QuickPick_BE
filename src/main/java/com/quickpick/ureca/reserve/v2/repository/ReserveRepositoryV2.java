@@ -1,4 +1,7 @@
 package com.quickpick.ureca.reserve.v2.repository;
 
-public class ReserveRepositoryV2 {
+import com.quickpick.ureca.reserve.domain.Reserve;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ReserveRepositoryV2 extends JpaRepository<Reserve, Long> {
 }
