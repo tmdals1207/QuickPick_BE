@@ -8,9 +8,13 @@ import com.quickpick.ureca.user.repository.UserRepository;
 import com.quickpick.ureca.userticket.v2.domain.UserTicket;
 import com.quickpick.ureca.userticket.v2.repository.UserTicketRepository;
 import lombok.RequiredArgsConstructor;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Transactional
@@ -19,8 +23,9 @@ public class TicketServiceImplV2 implements TicketServiceV2 {
     private final TicketRepositoryV2 ticketRepository;
     private final UserRepository userRepository;
     private final UserTicketRepository userTicketRepository;
+    private final RedissonClient redissonClient;
 
-
+    /* Test 2
     @Override
     @Transactional
     public void orderTicket(Long ticketId, Long userId) {
@@ -55,6 +60,50 @@ public class TicketServiceImplV2 implements TicketServiceV2 {
 
         UserTicket userTicket = new UserTicket(user, ticket);
         userTicketRepository.save(userTicket);
+    }
+
+     */
+
+
+    @Override
+    @Transactional
+    public void orderTicket(Long ticketId, Long userId) {
+        RLock lock = redissonClient.getLock("ticketLock:" + ticketId);
+
+        boolean isLocked = false;
+        try {
+            // 최대 2초 대기, 5초 안에 락 자동 해제
+            isLocked = lock.tryLock(2, 5, TimeUnit.SECONDS);
+
+            if (!isLocked) {
+                throw new RuntimeException("잠시 후 다시 시도해주세요.");
+            }
+
+            Ticket ticket = ticketRepository.findById(ticketId)
+                    .orElseThrow(() -> new RuntimeException("존재하지 않는 티켓입니다."));
+            if (ticket.getQuantity() <= 0) {
+                throw new RuntimeException("매진된 티켓입니다.");
+            }
+
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다."));
+            if (userTicketRepository.existsByUserAndTicket(user, ticket)) {
+                throw new RuntimeException("이미 예매한 티켓입니다.");
+            }
+
+            ticket.setQuantity(ticket.getQuantity() - 1);
+            ticketRepository.save(ticket);
+
+            UserTicket userTicket = new UserTicket(user, ticket);
+            userTicketRepository.save(userTicket);
+
+        } catch (InterruptedException e) {
+            throw new RuntimeException("락 획득 실패", e);
+        } finally {
+            if (isLocked) {
+                lock.unlock();
+            }
+        }
     }
 
 

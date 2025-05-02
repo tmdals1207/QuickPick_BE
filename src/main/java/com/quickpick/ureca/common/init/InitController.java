@@ -22,8 +22,8 @@ public class InitController {
 
     @PostMapping
     public String initializeData(
-            @RequestParam(defaultValue = "20") int ticketCount,
-            @RequestParam(defaultValue = "1000") int userCount,
+            @RequestParam(defaultValue = "3000") int ticketCount,
+            @RequestParam(defaultValue = "10000") int userCount,
             @RequestParam(defaultValue = "1") long ticketId,
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
