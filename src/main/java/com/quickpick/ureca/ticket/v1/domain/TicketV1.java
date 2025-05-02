@@ -1,12 +1,9 @@
 package com.quickpick.ureca.ticket.v1.domain;
 
-import com.quickpick.ureca.common.domain.BaseEntity;
-import com.quickpick.ureca.userticket.domain.UserTicket;
 import com.quickpick.ureca.userticket.v1.domain.UserTicketV1;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -8,17 +8,13 @@ import com.quickpick.ureca.user.v1.repository.UserRepositoryV1;
 import com.quickpick.ureca.user.v1.service.UserBulkInsertService;
 import com.quickpick.ureca.userticket.v1.domain.UserTicketV1;
 import com.quickpick.ureca.userticket.v1.repository.UserTicketRepositoryV1;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import org.springframework.boot.test.context.SpringBootTest;
+
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
