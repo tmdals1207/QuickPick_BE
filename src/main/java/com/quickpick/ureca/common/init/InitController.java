@@ -37,7 +37,7 @@ public class InitController {
 
         // 티켓 생성
         Ticket ticket = Ticket.builder()
-                .ticketId(ticketId)
+//                .ticketId(ticketId)
                 .name("테스트 티켓")
                 .quantity(ticketCount)
                 .startDate(startDate != null ? startDate : LocalDateTime.now().plusDays(1))
