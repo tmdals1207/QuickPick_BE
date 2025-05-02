@@ -3,6 +3,8 @@ package com.quickpick.ureca.ticket.domain;
 import com.quickpick.ureca.common.domain.BaseEntity;
 import com.quickpick.ureca.userticket.domain.UserTicket;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -13,7 +15,9 @@ import java.util.List;
 @Entity
 @Table(name = "ticket")
 @Getter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class Ticket extends BaseEntity {
 
     @Id
