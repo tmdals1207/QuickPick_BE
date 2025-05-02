@@ -1,6 +1,6 @@
 package com.quickpick.ureca;
 
-import com.quickpick.ureca.config.jwt.JwtProperties;
+import com.quickpick.ureca.auth.config.JwtProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

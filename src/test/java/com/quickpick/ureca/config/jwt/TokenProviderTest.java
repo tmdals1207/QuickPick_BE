@@ -1,5 +1,7 @@
 package com.quickpick.ureca.config.jwt;
 
+import com.quickpick.ureca.auth.config.JwtProperties;
+import com.quickpick.ureca.auth.config.TokenProvider;
 import com.quickpick.ureca.user.domain.User;
 import com.quickpick.ureca.user.repository.UserRepository;
 import io.jsonwebtoken.Jwts;

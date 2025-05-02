@@ -1,8 +1,7 @@
-package com.quickpick.ureca.config.jwt;
+package com.quickpick.ureca.auth.config;
 
 import com.quickpick.ureca.user.domain.User;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
