@@ -1,18 +1,19 @@
-package com.quickpick.ureca.user.domain;
+package com.quickpick.ureca.user.v3.domain;
 
 import com.quickpick.ureca.common.domain.BaseEntity;
-import com.quickpick.ureca.userticket.domain.UserTicket;
+import com.quickpick.ureca.user.v3.constants.Gender;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Table
 @Entity
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class User extends BaseEntity {
 
     @Id
@@ -30,12 +31,9 @@ public class User extends BaseEntity {
     private String name;
 
     @Column(nullable = false)
-    private String age;
+    private int age;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String gender;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserTicket> userTickets = new ArrayList<>();
-
+    private Gender gender;
 }
