@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -26,6 +25,7 @@ public class ReserveServiceV1 {
     @Autowired
     private UserTicketRepositoryV1 userTicketRepositoryV1;
 
+    // 1.
 //    // 티켓 예약 메서드 (락 X) Average : 586, Throughput : 17.5/sec
 //    @Transactional
 //    public void reserveTicket(Long userId, Long ticketId) {
@@ -48,17 +48,44 @@ public class ReserveServiceV1 {
 //        userTicketRepositoryV1.save(userTicket);
 //    }
 
-    // 티켓 예약 메서드 (비관적 락) - Pessimistic Lock Average : 802, Throughput : 15.6/sec
+
+    // 2.
+//    // 티켓 예약 메서드 (비관적 락) - Pessimistic Lock Average : 802, Throughput : 15.6/sec
+//    @Transactional
+//    public void reserveTicket(Long userId, Long ticketId) {
+//
+//        log.info(">>> reserveTicket called: userId = {}, ticketId = {}", userId, ticketId);
+//
+//        UserV1 user = userRepositoryV1.findById(userId)
+//                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+//
+//        System.out.println("Reserve Ticket");
+//        TicketV1 ticket = ticketRepositoryV1.findByIdForUpdate(ticketId)
+//                .orElseThrow(() -> new IllegalArgumentException("Ticket not found"));
+//
+//        if (ticket.getQuantity() <= 0) {
+//            throw new IllegalStateException("Ticket out of stock");
+//        }
+//
+//        ticket.setQuantity(ticket.getQuantity() - 1);
+//        userTicketRepositoryV1.save(new UserTicketV1(user, ticket));
+//    }
+
+    // 3.
+    // 티켓 예약 메서드 (비관적 락 + open-in-view) False Average : 6676, Throughput : 602.6/sec
+    // 티켓 예약 메서드 (open-in-view + FetchJoin + DTO) False Average : 69005, Throughput : 64.9/sec
+    // 티켓 예약 메서드 (비관적 락 + open-in-view) True Average : 4818, Throughput : 723.2/sec
     @Transactional
-    public void reserveTicket(Long userId, Long ticketId) {
+    public TicketV1 reserveTicket(Long userId, Long ticketId) {
 
         log.info(">>> reserveTicket called: userId = {}, ticketId = {}", userId, ticketId);
 
+        // user는 fetch join 하지 않았으므로 별도로 조회
         UserV1 user = userRepositoryV1.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        System.out.println("Reserve Ticket");
-        TicketV1 ticket = ticketRepositoryV1.findByIdForUpdate(ticketId)
+        // fetch join으로 모든 필요한 정보 로딩
+        TicketV1 ticket = ticketRepositoryV1.findByIdForUpdateWithUsers(ticketId)
                 .orElseThrow(() -> new IllegalArgumentException("Ticket not found"));
 
         if (ticket.getQuantity() <= 0) {
@@ -67,6 +94,8 @@ public class ReserveServiceV1 {
 
         ticket.setQuantity(ticket.getQuantity() - 1);
         userTicketRepositoryV1.save(new UserTicketV1(user, ticket));
+        return ticket;
     }
+
 
 }
