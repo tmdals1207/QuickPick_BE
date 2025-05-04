@@ -39,8 +39,8 @@ public class Ticket extends BaseEntity {
     @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserTicket> userTickets = new ArrayList<>();
 
-    @Version
-    private Long version;
+//    @Version
+//    private Long version;
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;
