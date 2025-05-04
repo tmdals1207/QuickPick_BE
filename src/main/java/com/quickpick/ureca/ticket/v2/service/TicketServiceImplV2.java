@@ -9,11 +9,15 @@ import com.quickpick.ureca.userticket.v2.domain.UserTicket;
 import com.quickpick.ureca.userticket.v2.repository.UserTicketRepository;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RLock;
+import org.redisson.api.RScript;
 import org.redisson.api.RedissonClient;
+import org.redisson.client.codec.StringCodec;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -112,53 +116,94 @@ public class TicketServiceImplV2 implements TicketServiceV2 {
     /**
      * TEST4
      */
+//    @Override
+//    @Transactional
+//    public void orderTicket(Long ticketId, Long userId) {
+//        RLock lock = redissonClient.getLock("ticketLock:" + ticketId);
+//        boolean isLocked = false;
+//
+//        try {
+//            // 최대 2초 대기 후 락 획득 시도, 락은 5초 후 자동 해제
+//            isLocked = lock.tryLock(2, 5, TimeUnit.SECONDS);
+//            if (!isLocked) {
+//                throw new RuntimeException("잠시 후 다시 시도해주세요.");
+//            }
+//
+//            // 락 획득 후 티켓 조회 & 재고 확인
+//            Ticket ticket = ticketRepository.findById(ticketId)
+//                    .orElseThrow(() -> new RuntimeException("존재하지 않는 티켓입니다."));
+//
+//            if (ticket.getQuantity() <= 0) {
+//                throw new RuntimeException("매진된 티켓입니다.");
+//            }
+//
+//            // 티켓 수량 감소
+//            ticket.setQuantity(ticket.getQuantity() - 1);
+//            ticketRepository.save(ticket);
+//
+//            // 유저는 락 외부에서 조회해도 안전 (변동 없음)
+//            User user = userRepository.findById(userId)
+//                    .orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다."));
+//
+//            if (userTicketRepository.existsByUserAndTicket(user, ticket)) {
+//                throw new RuntimeException("이미 예매한 티켓입니다.");
+//            }
+//
+//            // UserTicket 저장 (락 밖으로 빼도 됨 - 부작용 없음)
+//            UserTicket userTicket = new UserTicket(user, ticket);
+//            userTicketRepository.save(userTicket);
+//
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException("락 획득 실패", e);
+//        } finally {
+//            if (isLocked && lock.isHeldByCurrentThread()) {
+//                lock.unlock();
+//            }
+//        }
+//    }
+
+    /**
+     * TEST5
+     */
     @Override
-    @Transactional
     public void orderTicket(Long ticketId, Long userId) {
-        RLock lock = redissonClient.getLock("ticketLock:" + ticketId);
-        boolean isLocked = false;
+        String stockKey = "ticket:stock:" + ticketId;
 
+        String luaScript =
+                "local stock = redis.call('GET', KEYS[1])\n" +
+                        "if not stock then return -1 end\n" +
+                        "stock = tonumber(stock)\n" +
+                        "if stock <= 0 then return -1 end\n" +
+                        "redis.call('DECR', KEYS[1])\n" +
+                        "return 1";
+
+        Long result;
         try {
-            // 최대 2초 대기 후 락 획득 시도, 락은 5초 후 자동 해제
-            isLocked = lock.tryLock(2, 5, TimeUnit.SECONDS);
-            if (!isLocked) {
-                throw new RuntimeException("잠시 후 다시 시도해주세요.");
-            }
-
-            // 락 획득 후 티켓 조회 & 재고 확인
-            Ticket ticket = ticketRepository.findById(ticketId)
-                    .orElseThrow(() -> new RuntimeException("존재하지 않는 티켓입니다."));
-
-            if (ticket.getQuantity() <= 0) {
-                throw new RuntimeException("매진된 티켓입니다.");
-            }
-
-            // 티켓 수량 감소
-            ticket.setQuantity(ticket.getQuantity() - 1);
-            ticketRepository.save(ticket);
-
-            // 유저는 락 외부에서 조회해도 안전 (변동 없음)
-            User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다."));
-
-            if (userTicketRepository.existsByUserAndTicket(user, ticket)) {
-                throw new RuntimeException("이미 예매한 티켓입니다.");
-            }
-
-            // UserTicket 저장 (락 밖으로 빼도 됨 - 부작용 없음)
-            UserTicket userTicket = new UserTicket(user, ticket);
-            userTicketRepository.save(userTicket);
-
-        } catch (InterruptedException e) {
-            throw new RuntimeException("락 획득 실패", e);
-        } finally {
-            if (isLocked && lock.isHeldByCurrentThread()) {
-                lock.unlock();
-            }
+            result = redissonClient.getScript().eval(
+                    RScript.Mode.READ_WRITE,
+                    luaScript,
+                    RScript.ReturnType.INTEGER,
+                    Collections.singletonList(stockKey)
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Lua 실행 실패: " + e.getMessage(), e);
         }
+
+        if (result == null || result != 1L) {
+            throw new RuntimeException("매진된 티켓입니다.");
+        }
+
+        // 이후 DB에서 ticket, user 조회 및 중복 예매 확인 → UserTicket 저장
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 티켓입니다."));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다."));
+        if (userTicketRepository.existsByUserAndTicket(user, ticket)) {
+            throw new RuntimeException("이미 예매한 티켓입니다.");
+        }
+        UserTicket userTicket = new UserTicket(user, ticket);
+        userTicketRepository.save(userTicket);
     }
-
-
 
     @Override
     public void cancelTicket(Long ticketId, Long userId) {

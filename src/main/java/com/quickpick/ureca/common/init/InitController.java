@@ -5,6 +5,9 @@ import com.quickpick.ureca.ticket.v2.domain.Ticket;
 import com.quickpick.ureca.user.domain.User;
 import com.quickpick.ureca.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.redisson.api.RBucket;
+import org.redisson.api.RedissonClient;
+import org.redisson.client.codec.StringCodec;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,12 +22,12 @@ public class InitController {
 
     private final TicketRepository ticketRepository;
     private final UserRepository userRepository;
+    private final RedissonClient redissonClient;
 
     @PostMapping
     public String initializeData(
             @RequestParam(defaultValue = "3000") int ticketCount,
             @RequestParam(defaultValue = "10000") int userCount,
-            @RequestParam(defaultValue = "1") long ticketId,
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
             LocalDateTime startDate,
@@ -37,13 +40,19 @@ public class InitController {
 
         // 티켓 생성
         Ticket ticket = Ticket.builder()
-//                .ticketId(ticketId)
                 .name("테스트 티켓")
                 .quantity(ticketCount)
                 .startDate(startDate != null ? startDate : LocalDateTime.now().plusDays(1))
                 .reserveDate(reserveDate != null ? reserveDate : LocalDateTime.now())
                 .build();
         ticketRepository.save(ticket);
+
+        ticket = ticketRepository.save(ticket); // 저장 후 다시 받기 (ID 할당)
+
+        // Redis 재고 설정
+        String redisStockKey = "ticket:stock:" + ticket.getTicketId();
+        redissonClient.getBucket(redisStockKey, StringCodec.INSTANCE).set(String.valueOf(ticketCount));
+
 
         // 유저 생성
         List<User> users = new ArrayList<>();
