@@ -16,4 +16,14 @@ public interface TicketRepositoryV1 extends JpaRepository<TicketV1, Long> {
     @Query("select t from TicketV1 t where t.ticketId = :ticketId")
     Optional<TicketV1> findByIdForUpdate(Long ticketId);
 
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+    select t from TicketV1 t
+    left join fetch t.userTickets ut
+    left join fetch ut.user
+    where t.ticketId = :ticketId
+    """)
+    Optional<TicketV1> findByIdForUpdateWithUsers(Long ticketId);
+
 }
