@@ -165,44 +165,104 @@ public class TicketServiceImplV2 implements TicketServiceV2 {
     /**
      * TEST5
      */
+//    @Override
+//    public void orderTicket(Long ticketId, Long userId) {
+//        String stockKey = "ticket:stock:" + ticketId;
+//
+//        String luaScript =
+//                "local stock = redis.call('GET', KEYS[1])\n" +
+//                        "if not stock then return -1 end\n" +
+//                        "stock = tonumber(stock)\n" +
+//                        "if stock <= 0 then return -1 end\n" +
+//                        "redis.call('DECR', KEYS[1])\n" +
+//                        "return 1";
+//
+//        Long result;
+//        try {
+//            result = redissonClient.getScript().eval(
+//                    RScript.Mode.READ_WRITE,
+//                    luaScript,
+//                    RScript.ReturnType.INTEGER,
+//                    Collections.singletonList(stockKey)
+//            );
+//        } catch (Exception e) {
+//            throw new RuntimeException("Lua 실행 실패: " + e.getMessage(), e);
+//        }
+//
+//        if (result == null || result != 1L) {
+//            throw new RuntimeException("매진된 티켓입니다.");
+//        }
+//
+//        // 이후 DB에서 ticket, user 조회 및 중복 예매 확인 → UserTicket 저장
+//        Ticket ticket = ticketRepository.findById(ticketId)
+//                .orElseThrow(() -> new RuntimeException("존재하지 않는 티켓입니다."));
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다."));
+//        if (userTicketRepository.existsByUserAndTicket(user, ticket)) {
+//            throw new RuntimeException("이미 예매한 티켓입니다.");
+//        }
+//        UserTicket userTicket = new UserTicket(user, ticket);
+//        userTicketRepository.save(userTicket);
+//    }
+
+    /**
+     * TEST6
+     */
     @Override
+    @Transactional
     public void orderTicket(Long ticketId, Long userId) {
         String stockKey = "ticket:stock:" + ticketId;
+        String userSetKey = "ticket:users:" + ticketId;
 
         String luaScript =
                 "local stock = redis.call('GET', KEYS[1])\n" +
                         "if not stock then return -1 end\n" +
                         "stock = tonumber(stock)\n" +
                         "if stock <= 0 then return -1 end\n" +
+                        "local exists = redis.call('SISMEMBER', KEYS[2], ARGV[1])\n" +
+                        "if exists == 1 then return -2 end\n" +
                         "redis.call('DECR', KEYS[1])\n" +
+                        "redis.call('SADD', KEYS[2], ARGV[1])\n" +
                         "return 1";
 
         Long result;
         try {
-            result = redissonClient.getScript().eval(
+            result = redissonClient.getScript(StringCodec.INSTANCE).eval(
                     RScript.Mode.READ_WRITE,
                     luaScript,
                     RScript.ReturnType.INTEGER,
-                    Collections.singletonList(stockKey)
+                    Arrays.asList(stockKey, userSetKey),
+                    userId.toString()
             );
         } catch (Exception e) {
             throw new RuntimeException("Lua 실행 실패: " + e.getMessage(), e);
         }
 
-        if (result == null || result != 1L) {
+        if (result == -1L) {
             throw new RuntimeException("매진된 티켓입니다.");
         }
-
-        // 이후 DB에서 ticket, user 조회 및 중복 예매 확인 → UserTicket 저장
-        Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 티켓입니다."));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다."));
-        if (userTicketRepository.existsByUserAndTicket(user, ticket)) {
-            throw new RuntimeException("이미 예매한 티켓입니다.");
+        if (result == -2L) {
+            throw new RuntimeException("이미 예매한 유저입니다.");
         }
-        UserTicket userTicket = new UserTicket(user, ticket);
-        userTicketRepository.save(userTicket);
+
+        try {
+            Ticket ticket = ticketRepository.findById(ticketId)
+                    .orElseThrow(() -> new RuntimeException("존재하지 않는 티켓입니다."));
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다."));
+
+            UserTicket userTicket = new UserTicket(user, ticket);
+            userTicketRepository.save(userTicket);
+        } catch (Exception e) {
+            // Redis 재고 복구
+            redissonClient.getBucket(stockKey, StringCodec.INSTANCE).set(
+                    String.valueOf(
+                            Integer.parseInt((String) redissonClient.getBucket(stockKey, StringCodec.INSTANCE).get()) + 1
+                    )
+            );
+            redissonClient.getSet(userSetKey, StringCodec.INSTANCE).remove(userId.toString());
+            throw new RuntimeException("DB 저장 중 오류 발생, Redis 재고 복구", e);
+        }
     }
 
     @Override
