@@ -1,7 +1,7 @@
 package com.quickpick.ureca.userticket.v1.domain;
 
-import com.quickpick.ureca.ticket.v1.domain.TicketV1;
-import com.quickpick.ureca.user.v1.domain.UserV1;
+import com.quickpick.ureca.ticket.v1.domain.Ticket;
+import com.quickpick.ureca.user.domain.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Table
 @Getter
 @NoArgsConstructor
-public class UserTicketV1 {
+public class UserTicket {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,13 +19,13 @@ public class UserTicketV1 {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private UserV1 user;
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ticket_id")
-    private TicketV1 ticket;
+    private Ticket ticket;
 
-    public UserTicketV1(UserV1 user, TicketV1 ticket) {
+    public UserTicket(User user, Ticket ticket) {
         this.user = user;
         this.ticket = ticket;
     }

@@ -1,11 +1,11 @@
 package com.quickpick.ureca.reserve.v1.service;
 
-import com.quickpick.ureca.ticket.v1.domain.TicketV1;
+import com.quickpick.ureca.ticket.v1.domain.Ticket;
 import com.quickpick.ureca.ticket.v1.repository.TicketRepositoryV1;
-import com.quickpick.ureca.user.v1.domain.UserV1;
-import com.quickpick.ureca.user.v1.repository.UserRepositoryV1;
-import com.quickpick.ureca.userticket.v1.domain.UserTicketV1;
-import com.quickpick.ureca.userticket.v1.repository.UserTicketRepositoryV1;
+import com.quickpick.ureca.user.domain.User;
+import com.quickpick.ureca.user.repository.UserRepository;
+import com.quickpick.ureca.userticket.v1.domain.UserTicket;
+import com.quickpick.ureca.userticket.v1.repository.UserTicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,10 +20,10 @@ public class ReserveServiceV1 {
     private TicketRepositoryV1 ticketRepositoryV1;
 
     @Autowired
-    private UserRepositoryV1 userRepositoryV1;
+    private UserRepository userRepository;
 
     @Autowired
-    private UserTicketRepositoryV1 userTicketRepositoryV1;
+    private UserTicketRepository userTicketRepository;
 
     // 1.
 //    // 티켓 예약 메서드 (락 X) Average : 586, Throughput : 17.5/sec
@@ -76,16 +76,16 @@ public class ReserveServiceV1 {
     // 티켓 예약 메서드 (open-in-view + FetchJoin + DTO) False Average : 69005, Throughput : 64.9/sec
     // 티켓 예약 메서드 (비관적 락 + open-in-view) True Average : 4818, Throughput : 723.2/sec
     @Transactional
-    public TicketV1 reserveTicket(Long userId, Long ticketId) {
+    public Ticket reserveTicket(Long userId, Long ticketId) {
 
         log.info(">>> reserveTicket called: userId = {}, ticketId = {}", userId, ticketId);
 
         // user는 fetch join 하지 않았으므로 별도로 조회
-        UserV1 user = userRepositoryV1.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         // fetch join으로 모든 필요한 정보 로딩
-        TicketV1 ticket = ticketRepositoryV1.findByIdForUpdateWithUsers(ticketId)
+        Ticket ticket = ticketRepositoryV1.findByIdForUpdateWithUsers(ticketId)
                 .orElseThrow(() -> new IllegalArgumentException("Ticket not found"));
 
         if (ticket.getQuantity() <= 0) {
@@ -93,7 +93,7 @@ public class ReserveServiceV1 {
         }
 
         ticket.setQuantity(ticket.getQuantity() - 1);
-        userTicketRepositoryV1.save(new UserTicketV1(user, ticket));
+        userTicketRepository.save(new UserTicket(user, ticket));
         return ticket;
     }
 

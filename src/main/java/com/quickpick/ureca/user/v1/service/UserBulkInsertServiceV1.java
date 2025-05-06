@@ -1,6 +1,6 @@
 package com.quickpick.ureca.user.v1.service;
 
-import com.quickpick.ureca.user.v1.domain.UserV1;
+import com.quickpick.ureca.user.domain.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
@@ -10,16 +10,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class UserBulkInsertService {
+public class UserBulkInsertServiceV1 {
 
     @PersistenceContext
     private EntityManager entityManager;
 
     @Transactional
     public void insertUsersInBulk(int userCount) {
-        List<UserV1> users = new ArrayList<>();
+        List<User> users = new ArrayList<>();
         for (int i = 0; i < userCount; i++) {
-            users.add(new UserV1("user" + i));
+            users.add(new User("user" + i));
         }
 
         int batchSize = 100;

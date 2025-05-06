@@ -1,6 +1,6 @@
 package com.quickpick.ureca.ticket.v1.repository;
 
-import com.quickpick.ureca.ticket.v1.domain.TicketV1;
+import com.quickpick.ureca.ticket.v1.domain.Ticket;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -10,20 +10,20 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface TicketRepositoryV1 extends JpaRepository<TicketV1, Long> {
+public interface TicketRepositoryV1 extends JpaRepository<Ticket, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select t from TicketV1 t where t.ticketId = :ticketId")
-    Optional<TicketV1> findByIdForUpdate(Long ticketId);
+    @Query("select t from Ticket t where t.ticketId = :ticketId")
+    Optional<Ticket> findByIdForUpdate(Long ticketId);
 
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
-    select t from TicketV1 t
+    select t from Ticket t
     left join fetch t.userTickets ut
     left join fetch ut.user
     where t.ticketId = :ticketId
     """)
-    Optional<TicketV1> findByIdForUpdateWithUsers(Long ticketId);
+    Optional<Ticket> findByIdForUpdateWithUsers(Long ticketId);
 
 }

@@ -1,7 +1,7 @@
 package com.quickpick.ureca.ticket.v1.dto;
 
-import com.quickpick.ureca.ticket.v1.domain.TicketV1;
-import com.quickpick.ureca.user.v1.domain.UserV1;
+import com.quickpick.ureca.ticket.v1.domain.Ticket;
+import com.quickpick.ureca.user.domain.User;
 
 public record TicketReserveResponse(
         Long ticketId,
@@ -9,7 +9,7 @@ public record TicketReserveResponse(
         int remainingQuantity,
         String reservedByUsername
 ) {
-    public static TicketReserveResponse of(TicketV1 ticket, UserV1 user) {
+    public static TicketReserveResponse of(Ticket ticket, User user) {
         return new TicketReserveResponse(
                 ticket.getTicketId(),
                 ticket.getName(),

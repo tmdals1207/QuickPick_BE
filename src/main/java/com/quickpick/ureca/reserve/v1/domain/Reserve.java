@@ -1,4 +1,4 @@
-package com.quickpick.ureca.reserve.domain;
+package com.quickpick.ureca.reserve.v1.domain;
 
 import com.quickpick.ureca.common.domain.BaseEntity;
 import com.quickpick.ureca.reserve.status.ReserveStatus;
