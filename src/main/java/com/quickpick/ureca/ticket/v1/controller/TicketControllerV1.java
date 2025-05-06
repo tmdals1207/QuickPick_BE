@@ -26,27 +26,27 @@ public class TicketControllerV1 {
         this.userRepository = userRepository;
     }
 
-//    @PostMapping
-//    public ResponseEntity<String> reserve(@RequestParam Long userId, @RequestParam Long ticketId) {
-//        try {
-//            reserveServiceV1.reserveTicket(userId, ticketId);
-//            return ResponseEntity.ok("예약 성공");
-//        } catch (Exception e) {
-//            log.error("예약 실패: {}", e.getMessage());
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("예약 실패: " + e.getMessage());
-//        }
-//    }
-
     @PostMapping
-    public ResponseEntity<TicketReserveResponse> reserve(@RequestParam Long userId, @RequestParam Long ticketId) {
+    public ResponseEntity<String> reserve(@RequestParam Long userId, @RequestParam Long ticketId) {
         try {
-            Ticket ticket = reserveServiceV1.reserveTicket(userId, ticketId);
-            User user = userRepository.findById(userId).orElseThrow();
-            return ResponseEntity.ok(TicketReserveResponse.of(ticket, user));
+            reserveServiceV1.reserveTicket(userId, ticketId);
+            return ResponseEntity.ok("예약 성공");
         } catch (Exception e) {
             log.error("예약 실패: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("예약 실패: " + e.getMessage());
         }
     }
+
+//    @PostMapping
+//    public ResponseEntity<TicketReserveResponse> reserve(@RequestParam Long userId, @RequestParam Long ticketId) {
+//        try {
+//            Ticket ticket = reserveServiceV1.reserveTicket(userId, ticketId);
+//            User user = userRepository.findById(userId).orElseThrow();
+//            return ResponseEntity.ok(TicketReserveResponse.of(ticket, user));
+//        } catch (Exception e) {
+//            log.error("예약 실패: {}", e.getMessage());
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+//        }
+//    }
 
 }
