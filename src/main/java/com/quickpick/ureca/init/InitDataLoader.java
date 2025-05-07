@@ -3,6 +3,7 @@ package com.quickpick.ureca.init;
 import com.quickpick.ureca.ticket.v3.domain.Ticket;
 import com.quickpick.ureca.ticket.v3.repository.RedisStockRepository;
 import com.quickpick.ureca.ticket.v3.repository.TicketRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -21,6 +22,7 @@ public class InitDataLoader implements CommandLineRunner {
     private final RedisStockRepository redisStockRepository;
     private final JdbcTemplate jdbcTemplate;
 
+    @Transactional
     @Override
     public void run(String... args) {
         String sql = "INSERT INTO user (id, name, age, gender, password) VALUES (?, ?, ?, ?, ?)";
@@ -43,12 +45,12 @@ public class InitDataLoader implements CommandLineRunner {
 
         Ticket ticket = Ticket.builder()
                 .name("ticket")
-                .quantity(1000L)
+                .quantity(3000L)
                 .reserveTime(LocalDateTime.now())
                 .startDate(LocalDate.now())
                 .build();
 
         Ticket saveTicket = ticketRepository.save(ticket);
-        redisStockRepository.setTicket(saveTicket.getId(), 1000L);
+        redisStockRepository.setTicket(saveTicket.getId(), 3000L);
     }
 }
