@@ -266,7 +266,36 @@ public class TicketServiceImplV2 implements TicketServiceV2 {
     }
 
     @Override
+    @Transactional
     public void cancelTicket(Long ticketId, Long userId) {
+        String stockKey = "ticket:stock:" + ticketId;
+        String userSetKey = "ticket:users:" + ticketId;
+
+        String luaScript =
+                "local exists = redis.call('SISMEMBER', KEYS[2], ARGV[1])\n" +
+                        "if exists == 0 then return -1 end\n" + // 예매 기록 없음
+                        "redis.call('SREM', KEYS[2], ARGV[1])\n" +
+                        "redis.call('INCR', KEYS[1])\n" +
+                        "return 1";
+
+        Long result;
+        try {
+            result = redissonClient.getScript(StringCodec.INSTANCE).eval(
+                    RScript.Mode.READ_WRITE,
+                    luaScript,
+                    RScript.ReturnType.INTEGER,
+                    Arrays.asList(stockKey, userSetKey),
+                    userId.toString()
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Lua 실행 실패: " + e.getMessage(), e);
+        }
+
+        if (result == -1L) {
+            throw new RuntimeException("예매 기록이 없습니다.");
+        }
+
+        // Redis에서는 성공적으로 복구됐으므로, DB에서도 이력 삭제
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 티켓입니다."));
         User user = userRepository.findById(userId)
@@ -274,10 +303,8 @@ public class TicketServiceImplV2 implements TicketServiceV2 {
 
         UserTicket userTicket = userTicketRepository.findByUserAndTicket(user, ticket)
                 .orElseThrow(() -> new RuntimeException("예매 기록이 없습니다."));
-
         userTicketRepository.delete(userTicket);
-
-        ticket.setQuantity(ticket.getQuantity() + 1);
-        ticketRepository.save(ticket);
     }
+
+
 }

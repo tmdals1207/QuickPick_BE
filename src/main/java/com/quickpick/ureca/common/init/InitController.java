@@ -35,24 +35,27 @@ public class InitController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
             LocalDateTime reserveDate
     ) {
+        // DB 초기화
         ticketRepository.deleteAll();
         userRepository.deleteAll();
 
-        // 티켓 생성
+        // 티켓 생성 및 저장 (ID 생성)
         Ticket ticket = Ticket.builder()
                 .name("테스트 티켓")
                 .quantity(ticketCount)
                 .startDate(startDate != null ? startDate : LocalDateTime.now().plusDays(1))
                 .reserveDate(reserveDate != null ? reserveDate : LocalDateTime.now())
                 .build();
-        ticketRepository.save(ticket);
+        ticket = ticketRepository.save(ticket); // ID 보장
 
-        ticket = ticketRepository.save(ticket); // 저장 후 다시 받기 (ID 할당)
-
-        // Redis 재고 설정
+        // Redis 키 초기화
         String redisStockKey = "ticket:stock:" + ticket.getTicketId();
-        redissonClient.getBucket(redisStockKey, StringCodec.INSTANCE).set(String.valueOf(ticketCount));
+        String redisUserSetKey = "ticket:users:" + ticket.getTicketId();
 
+        // 재고 수량 설정
+        redissonClient.getBucket(redisStockKey, StringCodec.INSTANCE).set(String.valueOf(ticketCount));
+        // 중복 예매 유저 Set 초기화
+        redissonClient.getSet(redisUserSetKey, StringCodec.INSTANCE).delete();
 
         // 유저 생성
         List<User> users = new ArrayList<>();
@@ -70,4 +73,5 @@ public class InitController {
 
         return "초기화 완료: 티켓 1개(" + ticketCount + "개 수량), 유저 " + userCount + "명 생성";
     }
+
 }
