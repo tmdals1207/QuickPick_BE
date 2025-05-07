@@ -53,7 +53,7 @@ public class TokenControllerTest {
     @DisplayName("createNewAccessToken : 새로운 액세스 토큰을 발급한다.")
     @Test
     public void createNewAccessToken() throws Exception {
-        final String url = "/api/token";
+        final String url = "/auth/token";
         User testUser = userRepository.save( User.builder()
                 .id("user@gmail.com")
                 .password("test")
