@@ -1,11 +1,10 @@
 package com.quickpick.ureca.user.controller;
 
-import com.quickpick.ureca.user.dto.UserLoginRequestDto;
 import com.quickpick.ureca.user.dto.UserSignUpRequestDto;
 import com.quickpick.ureca.user.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final AuthenticationManager authenticationManager;
 
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody UserSignUpRequestDto dto) {
@@ -31,24 +31,5 @@ public class UserController {
         }
     }
 */
-/*
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserLoginRequestDto request) {
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-            );
 
-            User user = userService.findByUsername(request.getUsername());
-            String token = tokenProvider.generateToken(user, Duration.ofHours(2));
-
-            return ResponseEntity.ok(new TokenResponse(token));
-
-        } catch (AuthenticationException ex) {
-            return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body("아이디 또는 비밀번호가 잘못되었습니다.");
-        }
-    }
-    */
 }

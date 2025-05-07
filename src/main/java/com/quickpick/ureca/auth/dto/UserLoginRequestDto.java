@@ -1,4 +1,4 @@
-package com.quickpick.ureca.user.dto;
+package com.quickpick.ureca.auth.dto;
 
 import lombok.Getter;
 import lombok.Setter;
