@@ -3,6 +3,7 @@ package com.quickpick.ureca.auth.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -23,6 +24,7 @@ public class WebSecurityConfig {
 
     private final UserDetailsService userDetailsService;
     private final TokenProvider tokenProvider; // TokenProvider 추가
+    private final RedisTemplate<String, String> redisTemplate;
 
     // Static 리소스는 인증 없이 접근
     @Bean
@@ -48,7 +50,7 @@ public class WebSecurityConfig {
                         .invalidateHttpSession(true)
                 )
                 .csrf(AbstractHttpConfigurer::disable)  // CSRF 보호 비활성화 (API 서버일 경우)
-                .addFilterBefore(new TokenAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)  // JWT 필터 폼 로그인 필터 앞에 추가
+                .addFilterBefore(new TokenAuthenticationFilter(tokenProvider, redisTemplate), UsernamePasswordAuthenticationFilter.class)  // JWT 필터 폼 로그인 필터 앞에 추가
                 .build();
     }
 

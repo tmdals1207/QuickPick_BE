@@ -6,6 +6,7 @@ import com.quickpick.ureca.auth.dto.UserLoginResponseDto;
 import com.quickpick.ureca.auth.service.AuthService;
 import com.quickpick.ureca.user.domain.User;
 import com.quickpick.ureca.auth.dto.UserLoginRequestDto;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +42,15 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/auth/token")
+    @PostMapping("/auth/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest request) {
+        String token = authService.extractToken(request);
+        authService.logout(token);
+        return ResponseEntity.ok().build();
+    }
+
+
+    @PostMapping("/auth/token")                                        //엑세스 토큰 재발급
     public ResponseEntity<CreateAccessTokenResponse> createNewAccessToken(
             @RequestBody CreateAccessTokenRequest request) {
         String newAccessToken
@@ -50,6 +59,4 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new CreateAccessTokenResponse(newAccessToken));
     }
-
-
 }

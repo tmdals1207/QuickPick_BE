@@ -68,11 +68,18 @@ public class TokenProvider {
         return claims.get("user_id", Long.class);
     }
 
+    //Claims 가져오기
     private Claims getClaims(String token) {
         return Jwts.parser()
                 .verifyWith(Keys.hmacShaKeyFor(jwtProperties.getSecretKey().getBytes(StandardCharsets.UTF_8)))
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();      //getBody()가 deprecated되어 이걸 쓸 것
+    }
+
+    //남은 토큰 유효시간 계산
+    public long getRemainingValidity(String token) {
+        Claims claims = getClaims(token);
+        return claims.getExpiration().getTime() - System.currentTimeMillis();
     }
 }
