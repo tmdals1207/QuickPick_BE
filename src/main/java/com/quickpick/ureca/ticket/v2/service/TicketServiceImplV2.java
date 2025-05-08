@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Transactional
@@ -30,6 +32,7 @@ public class TicketServiceImplV2 implements TicketServiceV2 {
     // Lua 스크립트 및 SHA1 캐싱용 변수
     private String reserveLuaSha;
     private String rollbackLuaSha;
+    private final Map<Long, Ticket> ticketCache = new ConcurrentHashMap<>();
 
     /**
      * TEST 2
@@ -298,12 +301,11 @@ public class TicketServiceImplV2 implements TicketServiceV2 {
         rollbackLuaSha = script.scriptLoad(rollbackLua);
     }
 
-    @Transactional
+//    @Transactional
     public void orderTicket(Long ticketId, Long userId) {
         String stockKey = "ticket:stock:" + ticketId;
         String userSetKey = "ticket:users:" + ticketId;
 
-        // 예약 처리
         Long result;
         try {
             result = redissonClient.getScript(StringCodec.INSTANCE).evalSha(
@@ -325,15 +327,19 @@ public class TicketServiceImplV2 implements TicketServiceV2 {
         }
 
         try {
-            Ticket ticket = ticketRepository.findById(ticketId)
-                    .orElseThrow(() -> new RuntimeException("존재하지 않는 티켓입니다."));
+            // 🔽 캐시된 Ticket 사용
+            Ticket ticket = ticketCache.computeIfAbsent(ticketId, id ->
+                    ticketRepository.findById(id)
+                            .orElseThrow(() -> new RuntimeException("존재하지 않는 티켓입니다."))
+            );
+
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다."));
 
             UserTicket userTicket = new UserTicket(user, ticket);
             userTicketRepository.save(userTicket);
         } catch (Exception e) {
-            // Redis 복구 (Lua로 처리)
+            // Redis 복구 (Lua)
             redissonClient.getScript(StringCodec.INSTANCE).evalSha(
                     RScript.Mode.READ_WRITE,
                     rollbackLuaSha,
