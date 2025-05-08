@@ -1,5 +1,6 @@
 package com.quickpick.ureca.auth.config;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,12 +26,31 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         //요청 헤더의 auth 키의 값 조회
         String authHeader = request.getHeader(HEADER_AUTHORIZATION);
         String token = getAccessToken(authHeader);  //접두사 제거해서 토큰 가져오기
-        if(token != null && tokenProvider.validToken(token) && !isBlacklisted(token)) {       //토큰이 유효하고 블랙리스트에 없다면 인증 정보 설정
-            Authentication auth = tokenProvider.getAuthentication(token);
-            SecurityContextHolder.getContext().setAuthentication(auth);
-        }
 
-        filterChain.doFilter(request, response);
+        try {
+            if (token != null) {
+                tokenProvider.validToken(token);                            //에러가 발생하면 catch문으로
+                if (isBlacklisted(token)) {
+                    throw new JwtException("Blacklisted token");
+                }
+                //토큰이 유효하고 블랙리스트에 없다면 인증 정보 설정
+                Authentication auth = tokenProvider.getAuthentication(token);
+                SecurityContextHolder.getContext().setAuthentication(auth);
+            }
+
+            filterChain.doFilter(request, response);
+        } catch (JwtException e) {
+            setErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
+        }
+    }
+    //에러 메세지 설정 메서드
+    private void setErrorResponse(HttpServletResponse response, int status, String message) throws IOException {
+        response.setStatus(status);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        String responseBody = String.format("{\"error\": \"%s\"}", message);
+        response.getWriter().write(responseBody);
     }
 
     private boolean isBlacklisted(String token) {

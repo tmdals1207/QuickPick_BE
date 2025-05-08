@@ -1,8 +1,7 @@
 package com.quickpick.ureca.auth.config;
 
 import com.quickpick.ureca.user.domain.User;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -39,15 +38,21 @@ public class TokenProvider {
                 .compact();
     }
 
-    public boolean validToken(String token) {
+    //토큰 검증 메서드
+    public void validToken(String token) {
         try{
             Jwts.parser()
                     .verifyWith(Keys.hmacShaKeyFor(jwtProperties.getSecretKey().getBytes(StandardCharsets.UTF_8)))
                     .build()
                     .parseSignedClaims(token);
-            return true;
-        } catch (Exception e) {
-            return false;
+        } catch (SecurityException | MalformedJwtException e) { //서명이 불일치하거나 / 구조가 손상된 경우
+            throw new JwtException("Invalid JWT signature");
+        } catch (ExpiredJwtException e) {                       //만료된 토큰인 경우
+            throw new JwtException("JWT token expired");
+        } catch (UnsupportedJwtException e) {                   //지원하지 않는 토큰인 경우
+            throw new JwtException("Unsupported JWT token");
+        } catch (IllegalArgumentException e) {                  //토큰이 아예 없거나 비정상적으로 전달된 경우?
+            throw new JwtException("JWT token is invalid");
         }
     }
 

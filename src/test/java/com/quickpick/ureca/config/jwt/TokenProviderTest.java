@@ -4,6 +4,7 @@ import com.quickpick.ureca.auth.config.JwtProperties;
 import com.quickpick.ureca.auth.config.TokenProvider;
 import com.quickpick.ureca.user.domain.User;
 import com.quickpick.ureca.user.repository.UserRepository;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.DisplayName;
@@ -60,8 +61,14 @@ public class TokenProviderTest {
                 .build()
                 .createToken(jwtProperties);
 
-        boolean result = tokenProvider.validToken(token);
+        boolean result;
+        try {
+            tokenProvider.validToken(token);
 
+            result = true;
+        } catch (JwtException e) {
+            result = false;
+        }
         assertThat(result).isFalse();
     }
 
@@ -71,8 +78,14 @@ public class TokenProviderTest {
         String token = JwtFactory.withDefaultValues()
                 .createToken(jwtProperties);
 
-        boolean result = tokenProvider.validToken(token);
+        boolean result;
+        try {
+            tokenProvider.validToken(token);
 
+            result = true;
+        } catch (JwtException e) {
+            result = false;
+        }
         assertThat(result).isTrue();
     }
 

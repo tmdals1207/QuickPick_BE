@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -37,18 +38,13 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))        //서버 세션 비활성화(jwt 사용하므로)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/login", "/signup", "/user", "/auth/token").permitAll()  // 로그인, 회원가입, 유저 조회, 토큰 재발급은 인증 없이 접근
                         .anyRequest().authenticated()  // 그 외 요청은 인증 필요
                 )
-                .formLogin(formLogin -> formLogin
-                        .loginPage("/login")
-                        .defaultSuccessUrl("/ticketing")
-                )
-                .logout(logout -> logout
-                        .logoutSuccessUrl("/login")
-                        .invalidateHttpSession(true)
-                )
+                .formLogin(AbstractHttpConfigurer::disable)             //폼로그인 비활성화
                 .csrf(AbstractHttpConfigurer::disable)  // CSRF 보호 비활성화 (API 서버일 경우)
                 .addFilterBefore(new TokenAuthenticationFilter(tokenProvider, redisTemplate), UsernamePasswordAuthenticationFilter.class)  // JWT 필터 폼 로그인 필터 앞에 추가
                 .build();

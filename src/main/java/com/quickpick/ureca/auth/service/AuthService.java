@@ -1,10 +1,13 @@
 package com.quickpick.ureca.auth.service;
 
 import com.quickpick.ureca.auth.config.TokenProvider;
+import com.quickpick.ureca.auth.domain.RefreshToken;
 import com.quickpick.ureca.auth.dto.UserLoginResponseDto;
 import com.quickpick.ureca.user.domain.User;
 import com.quickpick.ureca.user.service.UserService;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -25,6 +28,7 @@ public class AuthService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     //jwt 로그인
+    @Transactional
     public UserLoginResponseDto login(String id, String password) {
         User user = userService.findById(id);
 
@@ -50,23 +54,36 @@ public class AuthService {
     }
 
     //로그아웃
-    public void logout(String token) {
-        if (!tokenProvider.validToken(token)) {
-            throw new IllegalArgumentException("Invalid token");
-        }
+    @Transactional
+    public void logout(String accessToken) {
 
-        long expiration = tokenProvider.getRemainingValidity(token);                //토큰의 남은 유효시간 계산
-        redisTemplate.opsForValue().set("blacklist:" + token, "logout", expiration, TimeUnit.MILLISECONDS); //남은 유효시간 만큼 블랙리스트에 넣기
+        //엑세스 토큰 블랙리스트 추가
+        long expiration = tokenProvider.getRemainingValidity(accessToken);                //엑세스 토큰의 남은 유효시간 계산
+        redisTemplate.opsForValue().set("blacklist:" + accessToken, "logout", expiration, TimeUnit.MILLISECONDS); //남은 유효시간 만큼 블랙리스트에 넣기
+
+        //리프레시 토큰 삭제
+        Long userId = tokenProvider.getUserId(accessToken);
+        refreshTokenService.deleteByUserId(userId);
     }
 
     //리프레시 토큰을 이용한 엑세스 토큰 재발급
+    @Transactional
     public String createNewAccessToken(String refreshToken) {
         //리프레시 토큰이 유효하지 않으면 에러
-        if(!tokenProvider.validToken(refreshToken)) {
-            throw new IllegalArgumentException("Invalid refresh token");
+        try {
+            tokenProvider.validToken(refreshToken);
+        } catch (JwtException e) {
+            throw new JwtException(e.getMessage());
         }
 
-        Long userId = refreshTokenService.findByRefreshToken(refreshToken).getUserId();
+        //저장된 리프레시 토큰 값과 달라도 에러 (아마 위에서 다 걸리지겠지만 혹시 모르니까)
+        RefreshToken savedRefreshToken = refreshTokenService.findByRefreshToken(refreshToken);
+        if (savedRefreshToken == null) {
+            throw new JwtException("Invalid JWT token");
+        }
+        
+        //유효성이 검증되면 유저 정보 받아와서 새 엑세스 토큰 생성
+        Long userId = savedRefreshToken.getUserId();
         User user = userService.findByUserId(userId);
 
         return tokenProvider.generateToken(user, Duration.ofHours(2));

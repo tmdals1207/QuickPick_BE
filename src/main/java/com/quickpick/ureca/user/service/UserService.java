@@ -25,11 +25,7 @@ public class UserService {
                 .gender(dto.getGender())
                 .build());
     }
-/*
-    public boolean login(UserLoginRequestDto dto) {
 
-    }
- */
     //user_id(고유 번호)로 유저 검색
     public User findByUserId(Long userId) {
         return userRepository.findByUserId(userId)
