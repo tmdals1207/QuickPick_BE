@@ -146,65 +146,65 @@ public class ReserveServiceV1 {
     // 5.
     // 티켓 예약 메서드 (비관적 락 + 중복방지 + open-in-view(True) + Projection + 네이티브 쿼리) Average : 11248, Throughput : 320.5/sec
     // 티켓 예약 메서드 (비관적 락 + 중복방지 + open-in-view(False) + Projection + 네이티브 쿼리) Average : 13033, Throughput : 293.7/sec
-    @Transactional
-    public void reserveTicket(Long userId, Long ticketId) {
-
-        log.info(">>> reserveTicket called: userId = {}, ticketId = {}", userId, ticketId);
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-        // quantity만 조회하는 Projection으로 변경
-        TicketQuantityProjection ticketProjection = ticketRepositoryV1.findQuantityForUpdate(ticketId);
-        if (ticketProjection == null) {
-            throw new IllegalArgumentException("Ticket not found");
-        }
-
-        if (userTicketRepository.existsUserTicketRaw(userId, ticketId) != null) {
-            log.warn("이미 예약한 유저입니다. userId={}, ticketId={}", userId, ticketId);
-            return;
-        }
-
-        if (ticketProjection.getQuantity() <= 0) {
-            throw new IllegalStateException("Ticket out of stock");
-        }
-
-        // 수량 감소는 직접 쿼리로 처리하거나, 엔티티 조회 후 업데이트 필요
-        ticketRepositoryV1.decreaseQuantity(ticketId); // 이 메서드는 아래에 작성
-        userTicketRepository.save(new UserTicket(user, ticketRepositoryV1.getReferenceById(ticketId)));
-
-    }
-
-
-    // 티켓 예약 메서드 (비관적 락 + 중복방지 + In-Memory 캐시 + Sharding + 네이티브 쿼리) Average : 13016, Throughput : 474.7/sec
 //    @Transactional
 //    public void reserveTicket(Long userId, Long ticketId) {
-//        log.info("Reserving ticket: userId = {}, ticketId = {}", userId, ticketId);
 //
-//        if (ticketSoldOutCache.isSoldOut(ticketId)) {
-//            throw new IllegalStateException("이미 매진된 티켓입니다.");
-//        }
+//        log.info(">>> reserveTicket called: userId = {}, ticketId = {}", userId, ticketId);
 //
 //        User user = userRepository.findById(userId)
 //                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 //
-//        if (userTicketShardingRepository.exists(userId, ticketId)) {
-//            throw new IllegalStateException("이미 예약함");
+//        // quantity만 조회하는 Projection으로 변경
+//        TicketQuantityProjection ticketProjection = ticketRepositoryV1.findQuantityForUpdate(ticketId);
+//        if (ticketProjection == null) {
+//            throw new IllegalArgumentException("Ticket not found");
 //        }
 //
-//        Ticket ticket = ticketRepositoryV1.findByIdForUpdate(ticketId)
-//                .orElseThrow(() -> new IllegalArgumentException("Ticket not found"));
-//
-//        if (ticket.getQuantity() <= 0) {
-//            ticketSoldOutCache.markSoldOut(ticketId); // 캐시 반영
-//            throw new IllegalStateException("재고 없음");
+//        if (userTicketRepository.existsUserTicketRaw(userId, ticketId) != null) {
+//            log.warn("이미 예약한 유저입니다. userId={}, ticketId={}", userId, ticketId);
+//            return;
 //        }
 //
-//        ticket.setQuantity(ticket.getQuantity() - 1);
+//        if (ticketProjection.getQuantity() <= 0) {
+//            throw new IllegalStateException("Ticket out of stock");
+//        }
 //
-//        userTicketShardingRepository.saveIgnoreDuplicate(
-//                new UserTicket(user, ticketRepositoryV1.getReferenceById(ticketId))
-//        );
+//        // 수량 감소는 직접 쿼리로 처리하거나, 엔티티 조회 후 업데이트 필요
+//        ticketRepositoryV1.decreaseQuantity(ticketId); // 이 메서드는 아래에 작성
+//        userTicketRepository.save(new UserTicket(user, ticketRepositoryV1.getReferenceById(ticketId)));
+//
 //    }
+
+
+    // 티켓 예약 메서드 (비관적 락 + 중복방지 + In-Memory 캐시 + Sharding + 네이티브 쿼리) Average : 13016, Throughput : 474.7/sec
+    @Transactional
+    public void reserveTicket(Long userId, Long ticketId) {
+        log.info("Reserving ticket: userId = {}, ticketId = {}", userId, ticketId);
+
+        if (ticketSoldOutCache.isSoldOut(ticketId)) {
+            throw new IllegalStateException("이미 매진된 티켓입니다.");
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (userTicketShardingRepository.exists(userId, ticketId)) {
+            throw new IllegalStateException("이미 예약함");
+        }
+
+        Ticket ticket = ticketRepositoryV1.findByIdForUpdate(ticketId)
+                .orElseThrow(() -> new IllegalArgumentException("Ticket not found"));
+
+        if (ticket.getQuantity() <= 0) {
+            ticketSoldOutCache.markSoldOut(ticketId); // 캐시 반영
+            throw new IllegalStateException("재고 없음");
+        }
+
+        ticket.setQuantity(ticket.getQuantity() - 1);
+
+        userTicketShardingRepository.saveIgnoreDuplicate(
+                new UserTicket(user, ticketRepositoryV1.getReferenceById(ticketId))
+        );
+    }
 
 }
