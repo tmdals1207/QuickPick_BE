@@ -7,18 +7,16 @@ import com.quickpick.ureca.user.domain.User;
 import com.quickpick.ureca.user.repository.UserRepository;
 import com.quickpick.ureca.userticket.v2.domain.UserTicket;
 import com.quickpick.ureca.userticket.v2.repository.UserTicketRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RLock;
 import org.redisson.api.RScript;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.codec.StringCodec;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @Transactional
@@ -28,6 +26,10 @@ public class TicketServiceImplV2 implements TicketServiceV2 {
     private final UserRepository userRepository;
     private final UserTicketRepository userTicketRepository;
     private final RedissonClient redissonClient;
+
+    // Lua 스크립트 및 SHA1 캐싱용 변수
+    private String reserveLuaSha;
+    private String rollbackLuaSha;
 
     /**
      * TEST 2
@@ -208,28 +210,105 @@ public class TicketServiceImplV2 implements TicketServiceV2 {
     /**
      * TEST6
      */
-    @Override
+//    @Override
+//    @Transactional
+//    public void orderTicket(Long ticketId, Long userId) {
+//        String stockKey = "ticket:stock:" + ticketId;
+//        String userSetKey = "ticket:users:" + ticketId;
+//
+//        String luaScript =
+//                "local stock = redis.call('GET', KEYS[1])\n" +
+//                        "if not stock then return -1 end\n" +
+//                        "stock = tonumber(stock)\n" +
+//                        "if stock <= 0 then return -1 end\n" +
+//                        "local exists = redis.call('SISMEMBER', KEYS[2], ARGV[1])\n" +
+//                        "if exists == 1 then return -2 end\n" +
+//                        "redis.call('DECR', KEYS[1])\n" +
+//                        "redis.call('SADD', KEYS[2], ARGV[1])\n" +
+//                        "return 1";
+//
+//        Long result;
+//        try {
+//            result = redissonClient.getScript(StringCodec.INSTANCE).eval(
+//                    RScript.Mode.READ_WRITE,
+//                    luaScript,
+//                    RScript.ReturnType.INTEGER,
+//                    Arrays.asList(stockKey, userSetKey),
+//                    userId.toString()
+//            );
+//        } catch (Exception e) {
+//            throw new RuntimeException("Lua 실행 실패: " + e.getMessage(), e);
+//        }
+//
+//        if (result == -1L) {
+//            throw new RuntimeException("매진된 티켓입니다.");
+//        }
+//        if (result == -2L) {
+//            throw new RuntimeException("이미 예매한 유저입니다.");
+//        }
+//
+//        try {
+//            Ticket ticket = ticketRepository.findById(ticketId)
+//                    .orElseThrow(() -> new RuntimeException("존재하지 않는 티켓입니다."));
+//            User user = userRepository.findById(userId)
+//                    .orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다."));
+//
+//            UserTicket userTicket = new UserTicket(user, ticket);
+//            userTicketRepository.save(userTicket);
+//        } catch (Exception e) {
+//            // Redis 재고 복구
+//            redissonClient.getBucket(stockKey, StringCodec.INSTANCE).set(
+//                    String.valueOf(
+//                            Integer.parseInt((String) redissonClient.getBucket(stockKey, StringCodec.INSTANCE).get()) + 1
+//                    )
+//            );
+//            redissonClient.getSet(userSetKey, StringCodec.INSTANCE).remove(userId.toString());
+//            throw new RuntimeException("DB 저장 중 오류 발생, Redis 재고 복구", e);
+//        }
+//    }
+
+    /**
+     * TEST7
+     */
+
+    @PostConstruct
+    public void loadLuaScripts() {
+        // 예약 처리 Lua
+        String reserveLua = """
+            local stock = redis.call('GET', KEYS[1])
+            if not stock then return -1 end
+            stock = tonumber(stock)
+            if stock <= 0 then return -1 end
+            local exists = redis.call('SISMEMBER', KEYS[2], ARGV[1])
+            if exists == 1 then return -2 end
+            redis.call('DECR', KEYS[1])
+            redis.call('SADD', KEYS[2], ARGV[1])
+            return 1
+        """;
+
+        // 롤백 처리 Lua
+        String rollbackLua = """
+            redis.call('INCR', KEYS[1])
+            redis.call('SREM', KEYS[2], ARGV[1])
+            return 1
+        """;
+
+        RScript script = redissonClient.getScript(StringCodec.INSTANCE);
+        reserveLuaSha = script.scriptLoad(reserveLua);
+        rollbackLuaSha = script.scriptLoad(rollbackLua);
+    }
+
     @Transactional
     public void orderTicket(Long ticketId, Long userId) {
         String stockKey = "ticket:stock:" + ticketId;
         String userSetKey = "ticket:users:" + ticketId;
 
-        String luaScript =
-                "local stock = redis.call('GET', KEYS[1])\n" +
-                        "if not stock then return -1 end\n" +
-                        "stock = tonumber(stock)\n" +
-                        "if stock <= 0 then return -1 end\n" +
-                        "local exists = redis.call('SISMEMBER', KEYS[2], ARGV[1])\n" +
-                        "if exists == 1 then return -2 end\n" +
-                        "redis.call('DECR', KEYS[1])\n" +
-                        "redis.call('SADD', KEYS[2], ARGV[1])\n" +
-                        "return 1";
-
+        // 예약 처리
         Long result;
         try {
-            result = redissonClient.getScript(StringCodec.INSTANCE).eval(
+            result = redissonClient.getScript(StringCodec.INSTANCE).evalSha(
                     RScript.Mode.READ_WRITE,
-                    luaScript,
+                    reserveLuaSha,
                     RScript.ReturnType.INTEGER,
                     Arrays.asList(stockKey, userSetKey),
                     userId.toString()
@@ -254,14 +333,15 @@ public class TicketServiceImplV2 implements TicketServiceV2 {
             UserTicket userTicket = new UserTicket(user, ticket);
             userTicketRepository.save(userTicket);
         } catch (Exception e) {
-            // Redis 재고 복구
-            redissonClient.getBucket(stockKey, StringCodec.INSTANCE).set(
-                    String.valueOf(
-                            Integer.parseInt((String) redissonClient.getBucket(stockKey, StringCodec.INSTANCE).get()) + 1
-                    )
+            // Redis 복구 (Lua로 처리)
+            redissonClient.getScript(StringCodec.INSTANCE).evalSha(
+                    RScript.Mode.READ_WRITE,
+                    rollbackLuaSha,
+                    RScript.ReturnType.INTEGER,
+                    Arrays.asList(stockKey, userSetKey),
+                    userId.toString()
             );
-            redissonClient.getSet(userSetKey, StringCodec.INSTANCE).remove(userId.toString());
-            throw new RuntimeException("DB 저장 중 오류 발생, Redis 재고 복구", e);
+            throw new RuntimeException("DB 저장 중 오류 발생, Redis 복구 수행", e);
         }
     }
 
