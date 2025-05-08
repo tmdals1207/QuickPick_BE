@@ -3,6 +3,7 @@ package com.quickpick.ureca.auth.config;
 import com.quickpick.ureca.user.domain.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SecurityException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -29,7 +30,6 @@ public class TokenProvider {
     public String makeToken(User user, Date expiry) {
 
         return Jwts.builder()
-                //.setHeaderParam(Header.TYPE, Header.JWT_TYPE) //deprecated, 이제 안 써도 라이브러리가 자동적으로 처리?
                 .issuer(jwtProperties.getIssuer())
                 .expiration(expiry)
                 .subject(user.getId())
@@ -45,7 +45,7 @@ public class TokenProvider {
                     .verifyWith(Keys.hmacShaKeyFor(jwtProperties.getSecretKey().getBytes(StandardCharsets.UTF_8)))
                     .build()
                     .parseSignedClaims(token);
-        } catch (SecurityException | MalformedJwtException e) { //서명이 불일치하거나 / 구조가 손상된 경우
+        } catch (SecurityException | MalformedJwtException e) { //서명이 불일치한 경우 / 구조가 손상된 경우
             throw new JwtException("Invalid JWT signature");
         } catch (ExpiredJwtException e) {                       //만료된 토큰인 경우
             throw new JwtException("JWT token expired");

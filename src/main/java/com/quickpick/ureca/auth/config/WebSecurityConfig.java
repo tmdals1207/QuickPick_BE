@@ -41,7 +41,7 @@ public class WebSecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))        //서버 세션 비활성화(jwt 사용하므로)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login", "/signup", "/user", "/auth/token").permitAll()  // 로그인, 회원가입, 유저 조회, 토큰 재발급은 인증 없이 접근
+                        .requestMatchers("/auth/login", "/signup", "/auth/token").permitAll()  // 로그인, 회원가입, 토큰 재발급은 인증 없이 접근
                         .anyRequest().authenticated()  // 그 외 요청은 인증 필요
                 )
                 .formLogin(AbstractHttpConfigurer::disable)             //폼로그인 비활성화
@@ -50,7 +50,7 @@ public class WebSecurityConfig {
                 .build();
     }
 
-    // AuthenticationManager 설정 (기존 폼 로그인 방식에서 사용)
+    // AuthenticationManager 설정 (필요한가?)
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http, BCryptPasswordEncoder bCryptPasswordEncoder, UserDetailsService userDetailsService) throws Exception {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();

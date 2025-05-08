@@ -29,8 +29,8 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             if (token != null) {
-                tokenProvider.validToken(token);                            //에러가 발생하면 catch문으로
-                if (isBlacklisted(token)) {
+                tokenProvider.validToken(token);                            //예외가 발생하면 catch문으로
+                if (isBlacklisted(token)) {                                 //블랙리스트에 있는 토큰이면 예외 발생
                     throw new JwtException("Blacklisted token");
                 }
                 //토큰이 유효하고 블랙리스트에 없다면 인증 정보 설정
