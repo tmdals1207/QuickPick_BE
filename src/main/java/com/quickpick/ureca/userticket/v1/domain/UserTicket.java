@@ -3,13 +3,17 @@ package com.quickpick.ureca.userticket.v1.domain;
 import com.quickpick.ureca.ticket.v1.domain.Ticket;
 import com.quickpick.ureca.user.domain.User;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table
 @Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class UserTicket {
 
     @Id

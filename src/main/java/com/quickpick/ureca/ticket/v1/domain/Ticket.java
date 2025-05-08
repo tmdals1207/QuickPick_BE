@@ -35,8 +35,8 @@ public class Ticket extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime reserveDate;
 
-    @Version
-    private Long version;
+    //@Version
+    //private Long version;
 
     @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserTicket> userTickets = new ArrayList<>();

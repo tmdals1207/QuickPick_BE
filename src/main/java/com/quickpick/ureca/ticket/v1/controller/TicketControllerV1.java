@@ -37,6 +37,7 @@ public class TicketControllerV1 {
         }
     }
 
+    // open-in-view + Fetch-Join + DTO
 //    @PostMapping
 //    public ResponseEntity<TicketReserveResponse> reserve(@RequestParam Long userId, @RequestParam Long ticketId) {
 //        try {
