@@ -54,6 +54,16 @@ jobs:
           spring.jpa.properties.hibernate.format_sql=true
           jwt.issuer=${{ secrets.JWT_ISSUER }}
           jwt.secret_key=${{ secrets.JWT_SECRET_KEY }}
+          
+          #Redis
+          spring.data.redis.host=localhost
+  
+          spring.data.redis.port=6379
+          
+          spring.data.redis.lettuce.pool.max-active=10
+          spring.data.redis.lettuce.pool.max-idle=10
+          spring.data.redis.lettuce.pool.min-idle=1
+          spring.data.redis.lettuce.pool.max-wait=1000ms
           EOT
         shell: bash
 
