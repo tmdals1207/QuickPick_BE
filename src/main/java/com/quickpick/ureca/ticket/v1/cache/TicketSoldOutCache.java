@@ -15,4 +15,8 @@ public class TicketSoldOutCache {
     public void markSoldOut(Long ticketId) {
         soldOutMap.put(ticketId, true);
     }
+
+    public void unmarkSoldOut(Long ticketId) {
+        soldOutMap.remove(ticketId);
+    }
 }

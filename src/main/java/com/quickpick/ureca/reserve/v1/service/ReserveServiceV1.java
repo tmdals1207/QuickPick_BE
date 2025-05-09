@@ -207,4 +207,30 @@ public class ReserveServiceV1 {
         );
     }
 
+    // 예약 취소 메서드
+    @Transactional
+    public void cancelReservation(Long userId, Long ticketId) {
+        log.info("Cancelling reservation: userId = {}, ticketId = {}", userId, ticketId);
+
+        // 예약 존재 여부 확인
+        if (!userTicketShardingRepository.exists(userId, ticketId)) {
+            throw new IllegalStateException("예약 내역이 존재하지 않습니다.");
+        }
+
+        // 예약 삭제
+        userTicketShardingRepository.delete(userId, ticketId);
+
+        // 티켓 수량 복원 (비관적 락으로 안전하게 처리)
+        Ticket ticket = ticketRepositoryV1.findByIdForUpdate(ticketId)
+                .orElseThrow(() -> new IllegalArgumentException("Ticket not found"));
+
+        ticket.setQuantity(ticket.getQuantity() + 1);
+
+        // 매진 캐시 초기화 (optional)
+        if (ticket.getQuantity() > 0) {
+            ticketSoldOutCache.unmarkSoldOut(ticketId);
+        }
+    }
+
+
 }

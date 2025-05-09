@@ -53,4 +53,15 @@ public class UserTicketShardingRepository {
                 .setParameter("ticketId", userTicket.getTicket().getTicketId())
                 .executeUpdate();
     }
+
+    public void delete(Long userId, Long ticketId) {
+        String tableName = getTableName(userId);
+        String sql = "DELETE FROM " + tableName + " WHERE user_id = :userId AND ticket_id = :ticketId";
+
+        em.createNativeQuery(sql)
+                .setParameter("userId", userId)
+                .setParameter("ticketId", ticketId)
+                .executeUpdate();
+    }
+
 }

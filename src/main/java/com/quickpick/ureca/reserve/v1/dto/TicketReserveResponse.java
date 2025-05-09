@@ -1,4 +1,4 @@
-package com.quickpick.ureca.ticket.v1.dto;
+package com.quickpick.ureca.reserve.v1.dto;
 
 import com.quickpick.ureca.ticket.v1.domain.Ticket;
 import com.quickpick.ureca.user.domain.User;
