@@ -38,6 +38,7 @@ dependencies {
 	testImplementation 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'
 
+	//spring security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	testImplementation 'org.springframework.security:spring-security-test'
 
@@ -47,6 +48,9 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 	implementation 'javax.xml.bind:jaxb-api:2.4.0-b180830.0359'
+
+	// Spring Security OAuth2 클라이언트 (구글/카카오 로그인 등)
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
 	//Redis
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'

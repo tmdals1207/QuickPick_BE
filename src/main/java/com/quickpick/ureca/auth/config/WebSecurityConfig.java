@@ -35,17 +35,20 @@ public class WebSecurityConfig {
     }
 
     // Security Filter Chain
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    @Bean                                              //매게 변수로 받을 생각이 없긴했는데 순환참조 때문에 일단 임시로
+    public SecurityFilterChain filterChain(HttpSecurity http, OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler) throws Exception {
         return http
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))        //서버 세션 비활성화(jwt 사용하므로)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login", "/signup", "/auth/token").permitAll()  // 로그인, 회원가입, 토큰 재발급은 인증 없이 접근
+                        .requestMatchers("/auth/login", "/signup", "/auth/token", "/oauth2/**").permitAll()  // 로그인, 회원가입, 토큰 재발급, 소셜로그인은 인증 없이 접근
                         .anyRequest().authenticated()  // 그 외 요청은 인증 필요
                 )
                 .formLogin(AbstractHttpConfigurer::disable)             //폼로그인 비활성화
                 .csrf(AbstractHttpConfigurer::disable)  // CSRF 보호 비활성화 (API 서버일 경우)
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler(oAuth2LoginSuccessHandler)  // 소셜로그인 설정
+                )
                 .addFilterBefore(new TokenAuthenticationFilter(tokenProvider, redisTemplate), UsernamePasswordAuthenticationFilter.class)  // JWT 필터 폼 로그인 필터 앞에 추가
                 .build();
     }

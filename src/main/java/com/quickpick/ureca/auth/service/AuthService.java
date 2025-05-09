@@ -30,7 +30,8 @@ public class AuthService {
     //jwt 로그인
     @Transactional
     public UserLoginResponseDto login(String id, String password) {
-        User user = userService.findById(id);
+        User user = userService.findById(id)
+                .orElseThrow(()-> new IllegalArgumentException("User not found"));
 
         if (!bCryptPasswordEncoder.matches(password, user.getPassword())) {       //비밀번호 일치 검증
             throw new BadCredentialsException("Invalid password");

@@ -43,7 +43,7 @@ public class AuthController {
     }
 
 
-    @PostMapping("/auth/token")                                        //엑세스 토큰 재발급
+    @PostMapping("/auth/token")                                        //jwt 엑세스 토큰 재발급
     public ResponseEntity<?> createNewAccessToken( //ResponseEntity<CreateAccessTokenResponse>-> ResponseEntity<?>로 수정
             @RequestBody CreateAccessTokenRequest request) {
         try {

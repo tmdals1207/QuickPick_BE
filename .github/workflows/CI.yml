@@ -55,6 +55,15 @@ jobs:
           jwt.issuer=${{ secrets.JWT_ISSUER }}
           jwt.secret_key=${{ secrets.JWT_SECRET_KEY }}
           
+          # OAuth
+          spring.security.oauth2.client.registration.google.client-id=${{ secrets.GOOGLE_CLIENT_ID }}
+          spring.security.oauth2.client.registration.google.client-secret=${{ secrets.GOOGLE_CLIENT_SECRET }}
+          spring.security.oauth2.client.registration.google.scope=email,profile
+          
+          spring.security.oauth2.client.provider.google.authorization-uri=https://accounts.google.com/o/oauth2/v2/auth
+          spring.security.oauth2.client.provider.google.token-uri=https://oauth2.googleapis.com/token
+          spring.security.oauth2.client.provider.google.user-info-uri=https://www.googleapis.com/oauth2/v3/userinfo
+          
           #Redis
           spring.data.redis.host=localhost
   
