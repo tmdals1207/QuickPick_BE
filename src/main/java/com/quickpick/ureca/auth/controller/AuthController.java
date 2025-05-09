@@ -21,7 +21,7 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final AuthService authService;
 
-    @PostMapping("/auth/login")
+    @PostMapping("/auth/login")                 //jwt를 이용한 자체 로그인
     public ResponseEntity<?> login(@RequestBody UserLoginRequestDto request) {
         try {
             UserLoginResponseDto response = authService.login(request.getId(), request.getPassword());
