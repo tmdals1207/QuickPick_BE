@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Transactional
@@ -121,51 +122,50 @@ public class TicketServiceImplV2 implements TicketServiceV2 {
     /**
      * TEST4
      */
-//    @Override
-//    @Transactional
-//    public void orderTicket(Long ticketId, Long userId) {
-//        RLock lock = redissonClient.getLock("ticketLock:" + ticketId);
-//        boolean isLocked = false;
-//
-//        try {
-//            // 최대 2초 대기 후 락 획득 시도, 락은 5초 후 자동 해제
-//            isLocked = lock.tryLock(2, 5, TimeUnit.SECONDS);
-//            if (!isLocked) {
-//                throw new RuntimeException("잠시 후 다시 시도해주세요.");
-//            }
-//
-//            // 락 획득 후 티켓 조회 & 재고 확인
-//            Ticket ticket = ticketRepository.findById(ticketId)
-//                    .orElseThrow(() -> new RuntimeException("존재하지 않는 티켓입니다."));
-//
-//            if (ticket.getQuantity() <= 0) {
-//                throw new RuntimeException("매진된 티켓입니다.");
-//            }
-//
-//            // 티켓 수량 감소
-//            ticket.setQuantity(ticket.getQuantity() - 1);
-//            ticketRepository.save(ticket);
-//
-//            // 유저는 락 외부에서 조회해도 안전 (변동 없음)
-//            User user = userRepository.findById(userId)
-//                    .orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다."));
-//
-//            if (userTicketRepository.existsByUserAndTicket(user, ticket)) {
-//                throw new RuntimeException("이미 예매한 티켓입니다.");
-//            }
-//
-//            // UserTicket 저장 (락 밖으로 빼도 됨 - 부작용 없음)
-//            UserTicket userTicket = new UserTicket(user, ticket);
-//            userTicketRepository.save(userTicket);
-//
-//        } catch (InterruptedException e) {
-//            throw new RuntimeException("락 획득 실패", e);
-//        } finally {
-//            if (isLocked && lock.isHeldByCurrentThread()) {
-//                lock.unlock();
-//            }
-//        }
-//    }
+    @Override
+    public void orderTicket(Long ticketId, Long userId) {
+        RLock lock = redissonClient.getLock("ticketLock:" + ticketId);
+        boolean isLocked = false;
+        Ticket ticket;
+
+        try {
+            // 최대 2초 대기 후 락 획득 시도, 락은 5초 후 자동 해제
+            isLocked = lock.tryLock(2, 5, TimeUnit.SECONDS);
+            if (!isLocked) {
+                throw new RuntimeException("잠시 후 다시 시도해주세요.");
+            }
+
+            // 🔒 락 안에서: 티켓 조회 및 재고 감소
+            ticket = ticketRepository.findById(ticketId)
+                    .orElseThrow(() -> new RuntimeException("존재하지 않는 티켓입니다."));
+
+            if (ticket.getQuantity() <= 0) {
+                throw new RuntimeException("매진된 티켓입니다.");
+            }
+
+            ticket.setQuantity(ticket.getQuantity() - 1);
+            ticketRepository.save(ticket);
+
+        } catch (InterruptedException e) {
+            throw new RuntimeException("락 획득 실패", e);
+        } finally {
+            if (isLocked && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
+        }
+
+        // 🔓 락 외부: 유저 조회 및 예매 중복 검사, 예매 저장
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다."));
+
+        if (userTicketRepository.existsByUserAndTicket(user, ticket)) {
+            throw new RuntimeException("이미 예매한 티켓입니다.");
+        }
+
+        UserTicket userTicket = new UserTicket(user, ticket);
+        userTicketRepository.save(userTicket);
+    }
+
 
     /**
      * TEST5
@@ -274,82 +274,82 @@ public class TicketServiceImplV2 implements TicketServiceV2 {
      * TEST7
      */
 
-    @PostConstruct
-    public void loadLuaScripts() {
-        // 예약 처리 Lua
-        String reserveLua = """
-            local stock = redis.call('GET', KEYS[1])
-            if not stock then return -1 end
-            stock = tonumber(stock)
-            if stock <= 0 then return -1 end
-            local exists = redis.call('SISMEMBER', KEYS[2], ARGV[1])
-            if exists == 1 then return -2 end
-            redis.call('DECR', KEYS[1])
-            redis.call('SADD', KEYS[2], ARGV[1])
-            return 1
-        """;
-
-        // 롤백 처리 Lua
-        String rollbackLua = """
-            redis.call('INCR', KEYS[1])
-            redis.call('SREM', KEYS[2], ARGV[1])
-            return 1
-        """;
-
-        RScript script = redissonClient.getScript(StringCodec.INSTANCE);
-        reserveLuaSha = script.scriptLoad(reserveLua);
-        rollbackLuaSha = script.scriptLoad(rollbackLua);
-    }
-
-//    @Transactional
-    public void orderTicket(Long ticketId, Long userId) {
-        String stockKey = "ticket:stock:" + ticketId;
-        String userSetKey = "ticket:users:" + ticketId;
-
-        Long result;
-        try {
-            result = redissonClient.getScript(StringCodec.INSTANCE).evalSha(
-                    RScript.Mode.READ_WRITE,
-                    reserveLuaSha,
-                    RScript.ReturnType.INTEGER,
-                    Arrays.asList(stockKey, userSetKey),
-                    userId.toString()
-            );
-        } catch (Exception e) {
-            throw new RuntimeException("Lua 실행 실패: " + e.getMessage(), e);
-        }
-
-        if (result == -1L) {
-            throw new RuntimeException("매진된 티켓입니다.");
-        }
-        if (result == -2L) {
-            throw new RuntimeException("이미 예매한 유저입니다.");
-        }
-
-        try {
-            // 🔽 캐시된 Ticket 사용
-            Ticket ticket = ticketCache.computeIfAbsent(ticketId, id ->
-                    ticketRepository.findById(id)
-                            .orElseThrow(() -> new RuntimeException("존재하지 않는 티켓입니다."))
-            );
-
-            User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다."));
-
-            UserTicket userTicket = new UserTicket(user, ticket);
-            userTicketRepository.save(userTicket);
-        } catch (Exception e) {
-            // Redis 복구 (Lua)
-            redissonClient.getScript(StringCodec.INSTANCE).evalSha(
-                    RScript.Mode.READ_WRITE,
-                    rollbackLuaSha,
-                    RScript.ReturnType.INTEGER,
-                    Arrays.asList(stockKey, userSetKey),
-                    userId.toString()
-            );
-            throw new RuntimeException("DB 저장 중 오류 발생, Redis 복구 수행", e);
-        }
-    }
+//    @PostConstruct
+//    public void loadLuaScripts() {
+//        // 예약 처리 Lua
+//        String reserveLua = """
+//            local stock = redis.call('GET', KEYS[1])
+//            if not stock then return -1 end
+//            stock = tonumber(stock)
+//            if stock <= 0 then return -1 end
+//            local exists = redis.call('SISMEMBER', KEYS[2], ARGV[1])
+//            if exists == 1 then return -2 end
+//            redis.call('DECR', KEYS[1])
+//            redis.call('SADD', KEYS[2], ARGV[1])
+//            return 1
+//        """;
+//
+//        // 롤백 처리 Lua
+//        String rollbackLua = """
+//            redis.call('INCR', KEYS[1])
+//            redis.call('SREM', KEYS[2], ARGV[1])
+//            return 1
+//        """;
+//
+//        RScript script = redissonClient.getScript(StringCodec.INSTANCE);
+//        reserveLuaSha = script.scriptLoad(reserveLua);
+//        rollbackLuaSha = script.scriptLoad(rollbackLua);
+//    }
+//
+////    @Transactional
+//    public void orderTicket(Long ticketId, Long userId) {
+//        String stockKey = "ticket:stock:" + ticketId;
+//        String userSetKey = "ticket:users:" + ticketId;
+//
+//        Long result;
+//        try {
+//            result = redissonClient.getScript(StringCodec.INSTANCE).evalSha(
+//                    RScript.Mode.READ_WRITE,
+//                    reserveLuaSha,
+//                    RScript.ReturnType.INTEGER,
+//                    Arrays.asList(stockKey, userSetKey),
+//                    userId.toString()
+//            );
+//        } catch (Exception e) {
+//            throw new RuntimeException("Lua 실행 실패: " + e.getMessage(), e);
+//        }
+//
+//        if (result == -1L) {
+//            throw new RuntimeException("매진된 티켓입니다.");
+//        }
+//        if (result == -2L) {
+//            throw new RuntimeException("이미 예매한 유저입니다.");
+//        }
+//
+//        try {
+//            // 🔽 캐시된 Ticket 사용
+//            Ticket ticket = ticketCache.computeIfAbsent(ticketId, id ->
+//                    ticketRepository.findById(id)
+//                            .orElseThrow(() -> new RuntimeException("존재하지 않는 티켓입니다."))
+//            );
+//
+//            User user = userRepository.findById(userId)
+//                    .orElseThrow(() -> new RuntimeException("존재하지 않는 유저입니다."));
+//
+//            UserTicket userTicket = new UserTicket(user, ticket);
+//            userTicketRepository.save(userTicket);
+//        } catch (Exception e) {
+//            // Redis 복구 (Lua)
+//            redissonClient.getScript(StringCodec.INSTANCE).evalSha(
+//                    RScript.Mode.READ_WRITE,
+//                    rollbackLuaSha,
+//                    RScript.ReturnType.INTEGER,
+//                    Arrays.asList(stockKey, userSetKey),
+//                    userId.toString()
+//            );
+//            throw new RuntimeException("DB 저장 중 오류 발생, Redis 복구 수행", e);
+//        }
+//    }
 
     @Override
     @Transactional
