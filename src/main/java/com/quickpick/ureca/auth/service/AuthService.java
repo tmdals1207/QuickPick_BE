@@ -80,7 +80,7 @@ public class AuthService {
         //저장된 리프레시 토큰 값과 달라도 에러 (아마 위에서 다 걸리지겠지만 혹시 모르니까)
         RefreshToken savedRefreshToken = refreshTokenService.findByRefreshToken(refreshToken);
         if (savedRefreshToken == null) {
-            throw new JwtException("Invalid JWT token");
+            throw new JwtException("Invalid JWT RefreshToken");
         }
         
         //유효성이 검증되면 유저 정보 받아와서 새 엑세스 토큰 생성
