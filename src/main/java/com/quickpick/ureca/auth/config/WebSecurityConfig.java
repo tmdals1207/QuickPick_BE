@@ -35,7 +35,7 @@ public class WebSecurityConfig {
     }
 
     // Security Filter Chain
-    @Bean                                              //매게 변수로 받을 생각이 없긴했는데 순환참조 때문에 일단 임시로
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler) throws Exception {
         return http
                 .sessionManagement(session -> session
