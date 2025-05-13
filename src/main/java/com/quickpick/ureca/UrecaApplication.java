@@ -12,9 +12,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @EnableConfigurationProperties(JwtPropertiesOAuth.class)
 public class UrecaApplication {
-
 	public static void main(String[] args) {
 		SpringApplication.run(UrecaApplication.class, args);
 	}
-
 }
