@@ -1,6 +1,6 @@
 package com.quickpick.ureca.v1.ticket.repository;
 
-import com.quickpick.ureca.v1.ticket.domain.Ticket;
+import com.quickpick.ureca.v1.ticket.domain.TicketV1;
 import com.quickpick.ureca.v1.ticket.projection.TicketQuantityProjectionV1;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,28 +14,28 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 @Repository
-public interface TicketRepositoryV1 extends JpaRepository<Ticket, Long> {
+public interface TicketRepositoryV1 extends JpaRepository<TicketV1, Long> {
 
     // 비관적 락
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
-            select t from Ticket t where t.ticketId = :ticketId""")
-    Optional<Ticket> findByIdForUpdate(Long ticketId);
+            select t from TicketV1 t where t.ticketId = :ticketId""")
+    Optional<TicketV1> findByIdForUpdate(Long ticketId);
 
     // 비관적 락 (네이티브 쿼리)
     @Query(value = "SELECT * FROM ticket WHERE ticket_id = :ticketId FOR UPDATE", nativeQuery = true)
-    Ticket findByIdForUpdateNative(@Param("ticketId") Long ticketId);
+    TicketV1 findByIdForUpdateNative(@Param("ticketId") Long ticketId);
 
 
     // open-in-view + FetchJoin + DTO + 비관적 락
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
-    select t from Ticket t
+    select t from TicketV1 t
     left join fetch t.userTicketV1s ut
     left join fetch ut.user
     where t.ticketId = :ticketId
     """)
-    Optional<Ticket> findByIdForUpdateWithUsers(Long ticketId);
+    Optional<TicketV1> findByIdForUpdateWithUsers(Long ticketId);
 
 
     // Projection 기반 조회

@@ -1,7 +1,7 @@
 package com.quickpick.ureca.v1.reserve.service;
 
 import com.quickpick.ureca.v1.ticket.cache.TicketSoldOutCacheV1;
-import com.quickpick.ureca.v1.ticket.domain.Ticket;
+import com.quickpick.ureca.v1.ticket.domain.TicketV1;
 import com.quickpick.ureca.v1.ticket.repository.TicketRepositoryV1;
 import com.quickpick.ureca.v1.user.domain.User;
 import com.quickpick.ureca.v1.user.repository.UserRepositoryV1;
@@ -191,7 +191,7 @@ public class ReserveServiceV1 {
             throw new IllegalStateException("이미 예약함");
         }
 
-        Ticket ticket = ticketRepositoryV1.findByIdForUpdate(ticketId)
+        TicketV1 ticket = ticketRepositoryV1.findByIdForUpdate(ticketId)
                 .orElseThrow(() -> new IllegalArgumentException("Ticket not found"));
 
         if (ticket.getQuantity() <= 0) {
@@ -220,7 +220,7 @@ public class ReserveServiceV1 {
         userTicketShardingRepositoryV1.delete(userId, ticketId);
 
         // 티켓 수량 복원 (비관적 락으로 안전하게 처리)
-        Ticket ticket = ticketRepositoryV1.findByIdForUpdate(ticketId)
+        TicketV1 ticket = ticketRepositoryV1.findByIdForUpdate(ticketId)
                 .orElseThrow(() -> new IllegalArgumentException("Ticket not found"));
 
         ticket.setQuantity(ticket.getQuantity() + 1);
