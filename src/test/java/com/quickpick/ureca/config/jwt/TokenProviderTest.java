@@ -1,9 +1,9 @@
 package com.quickpick.ureca.config.jwt;
 
-import com.quickpick.ureca.auth.config.JwtProperties;
-import com.quickpick.ureca.auth.config.TokenProvider;
-import com.quickpick.ureca.user.domain.User;
-import com.quickpick.ureca.user.repository.UserRepository;
+import com.quickpick.ureca.OAuth.auth.config.JwtPropertiesOAuth;
+import com.quickpick.ureca.OAuth.auth.config.TokenProviderOAuth;
+import com.quickpick.ureca.OAuth.user.domain.UserOAuth;
+import com.quickpick.ureca.OAuth.user.repository.UserRepositoryOAuth;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -24,16 +24,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 public class TokenProviderTest {
     @Autowired
-    private TokenProvider tokenProvider;
+    private TokenProviderOAuth tokenProvider;
     @Autowired
-    private UserRepository userRepository;
+    private UserRepositoryOAuth userRepository;
     @Autowired
-    private JwtProperties jwtProperties;
+    private JwtPropertiesOAuth jwtProperties;
 
     @DisplayName("토큰 생성 테스트")
     @Test
     void generateToken() {
-        User testUser = userRepository.save(User.builder()
+        UserOAuth testUser = userRepository.save(UserOAuth.builder()
                 .id("user@gmail.com")
                 .password("password")
                 .name("testUser")

@@ -1,6 +1,6 @@
 package com.quickpick.ureca.config.jwt;
 
-import com.quickpick.ureca.auth.config.JwtProperties;
+import com.quickpick.ureca.OAuth.auth.config.JwtPropertiesOAuth;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.Builder;
@@ -35,7 +35,7 @@ public class JwtFactory { //test용 jwt 토큰 생성
         return JwtFactory.builder().build();
     } // withDefaultValues
 
-    public String createToken(JwtProperties jwtProperties) {
+    public String createToken(JwtPropertiesOAuth jwtProperties) {
         // 기본 클레임 설정
         Map<String, Object> tokenClaims = new HashMap<>();
 

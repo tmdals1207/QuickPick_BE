@@ -1,13 +1,13 @@
 package com.quickpick.ureca.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.quickpick.ureca.auth.config.JwtProperties;
-import com.quickpick.ureca.auth.domain.RefreshToken;
-import com.quickpick.ureca.auth.dto.CreateAccessTokenRequest;
-import com.quickpick.ureca.auth.repository.RefreshTokenRepository;
+import com.quickpick.ureca.OAuth.auth.config.JwtPropertiesOAuth;
+import com.quickpick.ureca.OAuth.auth.domain.RefreshTokenOAuth;
+import com.quickpick.ureca.OAuth.auth.dto.CreateAccessTokenRequestOAuth;
+import com.quickpick.ureca.OAuth.auth.repository.RefreshTokenRepositoryOAuth;
 import com.quickpick.ureca.config.jwt.JwtFactory;
-import com.quickpick.ureca.user.domain.User;
-import com.quickpick.ureca.user.repository.UserRepository;
+import com.quickpick.ureca.OAuth.user.domain.UserOAuth;
+import com.quickpick.ureca.OAuth.user.repository.UserRepositoryOAuth;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,7 +16,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MockMvcBuilder;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -38,11 +37,11 @@ public class TokenControllerTest {
     @Autowired
     private WebApplicationContext context;
     @Autowired
-    private JwtProperties jwtProperties;
+    private JwtPropertiesOAuth jwtProperties;
     @Autowired
-    private UserRepository userRepository;
+    private UserRepositoryOAuth userRepository;
     @Autowired
-    private RefreshTokenRepository refreshTokenRepository;
+    private RefreshTokenRepositoryOAuth refreshTokenRepository;
 
     @BeforeEach
     public void mockMvcSetUp() {
@@ -54,7 +53,7 @@ public class TokenControllerTest {
     @Test
     public void createNewAccessToken() throws Exception {
         final String url = "/auth/token";
-        User testUser = userRepository.save( User.builder()
+        UserOAuth testUser = userRepository.save( UserOAuth.builder()
                 .id("user@gmail.com")
                 .password("test")
                 .name("test")
@@ -65,9 +64,9 @@ public class TokenControllerTest {
                 .claims( Map.of( "user_id", testUser.getUserId() ) )
                 .build()
                 .createToken(jwtProperties);
-        refreshTokenRepository.save( new RefreshToken(testUser.getUserId(), refreshToken) );
+        refreshTokenRepository.save( new RefreshTokenOAuth(testUser.getUserId(), refreshToken) );
 
-        CreateAccessTokenRequest request = new CreateAccessTokenRequest();
+        CreateAccessTokenRequestOAuth request = new CreateAccessTokenRequestOAuth();
         request.setRefreshToken(refreshToken);
         final String requestBody = objectMapper.writeValueAsString(request);
 
