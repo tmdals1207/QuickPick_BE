@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/init")
+@RequestMapping("/init2")
 public class InitControllerV2 {
 
     private final TicketRepositoryV2 ticketRepository;

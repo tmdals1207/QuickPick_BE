@@ -1,6 +1,6 @@
 package com.quickpick.ureca.v1.common.init;
 
-import com.quickpick.ureca.v1.ticket.domain.Ticket;
+import com.quickpick.ureca.v1.ticket.domain.TicketV1;
 import com.quickpick.ureca.v1.ticket.repository.TicketRepositoryV1;
 import com.quickpick.ureca.v1.user.domain.User;
 import com.quickpick.ureca.v1.user.repository.UserRepositoryV1;
@@ -23,7 +23,7 @@ public class InitService {
         ticketRepository.deleteAll();
         userRepositoryV1.deleteAll();
 
-        Ticket ticket = Ticket.builder()
+        TicketV1 ticket = TicketV1.builder()
                 .name("테스트 티켓")
                 .quantity(ticketCount)
                 .startDate(startDate != null ? startDate : LocalDateTime.now().plusDays(1))

@@ -16,7 +16,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Ticket extends BaseEntity {
+public class TicketV1 extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,7 +51,7 @@ public class Ticket extends BaseEntity {
     }
 
     // Test용
-    public Ticket(String name, int i) {
+    public TicketV1(String name, int i) {
         this.name = name;
         this.quantity = i;
     }
