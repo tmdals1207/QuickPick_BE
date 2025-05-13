@@ -30,6 +30,9 @@ jobs:
           mysql user: 'test'
           mysql password: 'testPW'
 
+      - name: Start Redis
+        uses: supercharge/redis-github-action@1.6.0
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5
 
@@ -52,6 +55,9 @@ jobs:
           spring.jpa.properties.hibernate.show_sql=true
           spring.jpa.hibernate.ddl-auto=create-drop
           spring.jpa.properties.hibernate.format_sql=true
+          
+          spring.data.redis.host=localhost
+          spring.data.redis.port=6379
           EOT
         shell: bash
 
