@@ -1,6 +1,6 @@
 package com.quickpick.ureca.v3.ticket.domain;
 
-import com.quickpick.ureca.v3.common.BaseEntity;
+import com.quickpick.ureca.v3.common.BaseEntityV3;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Ticket extends BaseEntity {
+public class TicketV3 extends BaseEntityV3 {
 
     @Id
     @Column(name = "ticket_id")

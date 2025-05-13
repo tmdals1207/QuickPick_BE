@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class TicketPurchaseEvent {
+public class TicketPurchaseEventV3 {
     private String uuid;
     private Long ticketId;
     private Long userId;

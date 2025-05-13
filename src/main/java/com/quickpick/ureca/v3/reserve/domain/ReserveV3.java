@@ -1,6 +1,6 @@
 package com.quickpick.ureca.v3.reserve.domain;
 
-import com.quickpick.ureca.v3.common.BaseEntity;
+import com.quickpick.ureca.v3.common.BaseEntityV3;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Reserve extends BaseEntity {
+public class ReserveV3 extends BaseEntityV3 {
 
     @Column(name = "reserve_id")
     @Id @GeneratedValue
@@ -23,5 +23,5 @@ public class Reserve extends BaseEntity {
     private Long userId;
 
     @Column(nullable = false)
-    private ReserveStatus status;
+    private ReserveStatusV3 status;
 }

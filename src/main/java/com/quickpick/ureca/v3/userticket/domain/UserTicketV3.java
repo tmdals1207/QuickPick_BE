@@ -1,6 +1,6 @@
 package com.quickpick.ureca.v3.userticket.domain;
 
-import com.quickpick.ureca.v3.common.BaseEntity;
+import com.quickpick.ureca.v3.common.BaseEntityV3;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,7 +10,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserTicket extends BaseEntity {
+public class UserTicketV3 extends BaseEntityV3 {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

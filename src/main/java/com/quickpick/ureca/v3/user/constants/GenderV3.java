@@ -1,5 +1,5 @@
 package com.quickpick.ureca.v3.user.constants;
 
-public enum Gender {
+public enum GenderV3 {
     MALE, FEMALE
 }

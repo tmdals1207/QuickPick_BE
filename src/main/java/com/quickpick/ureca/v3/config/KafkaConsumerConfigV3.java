@@ -1,19 +1,19 @@
 package com.quickpick.ureca.v3.config;
 
-import com.quickpick.ureca.v3.ticket.event.TicketPurchaseEvent;
+import com.quickpick.ureca.v3.ticket.event.TicketPurchaseEventV3;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 
 @Configuration
-public class KafkaConsumerConfig {
+public class KafkaConsumerConfigV3 {
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, TicketPurchaseEvent> batchFactory(
-            ConsumerFactory<String, TicketPurchaseEvent> consumerFactory) {
+    public ConcurrentKafkaListenerContainerFactory<String, TicketPurchaseEventV3> batchFactory(
+            ConsumerFactory<String, TicketPurchaseEventV3> consumerFactory) {
 
-        ConcurrentKafkaListenerContainerFactory<String, TicketPurchaseEvent> factory =
+        ConcurrentKafkaListenerContainerFactory<String, TicketPurchaseEventV3> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
 
         factory.setConsumerFactory(consumerFactory);

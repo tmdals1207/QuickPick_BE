@@ -10,7 +10,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class RedisStockRepository {
+public class RedisStockRepositoryV3 {
 
     private final RedisTemplate<String, String> redisTemplate;
     private final String DECREASE_SCRIPT = """

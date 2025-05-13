@@ -1,7 +1,7 @@
 package com.quickpick.ureca.v3.user.domain;
 
-import com.quickpick.ureca.v3.common.BaseEntity;
-import com.quickpick.ureca.v3.user.constants.Gender;
+import com.quickpick.ureca.v3.common.BaseEntityV3;
+import com.quickpick.ureca.v3.user.constants.GenderV3;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User extends BaseEntity {
+public class UserV3 extends BaseEntityV3 {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,5 +31,5 @@ public class User extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Gender gender;
+    private GenderV3 genderV3;
 }

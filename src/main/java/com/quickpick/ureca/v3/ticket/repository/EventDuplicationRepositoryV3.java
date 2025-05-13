@@ -9,7 +9,7 @@ import java.time.Duration;
 
 @Repository
 @RequiredArgsConstructor
-public class EventDuplicationRepository {
+public class EventDuplicationRepositoryV3 {
 
     private final RedisTemplate<String, String> redisTemplate;
     private static final String KEY_PREFIX = "processed:";
