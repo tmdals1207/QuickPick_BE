@@ -31,7 +31,7 @@ public interface TicketRepositoryV1 extends JpaRepository<Ticket, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
     select t from Ticket t
-    left join fetch t.userTickets ut
+    left join fetch t.userTicketV1s ut
     left join fetch ut.user
     where t.ticketId = :ticketId
     """)
