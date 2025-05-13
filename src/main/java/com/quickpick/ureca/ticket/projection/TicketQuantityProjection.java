@@ -1,4 +1,4 @@
-package com.quickpick.ureca.ticket.v1.projection;
+package com.quickpick.ureca.ticket.projection;
 
 public interface TicketQuantityProjection {
     Long getTicketId();

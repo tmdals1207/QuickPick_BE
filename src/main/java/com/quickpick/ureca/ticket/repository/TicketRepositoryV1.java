@@ -1,7 +1,7 @@
-package com.quickpick.ureca.ticket.v1.repository;
+package com.quickpick.ureca.ticket.repository;
 
-import com.quickpick.ureca.ticket.v1.domain.Ticket;
-import com.quickpick.ureca.ticket.v1.projection.TicketQuantityProjection;
+import com.quickpick.ureca.ticket.domain.Ticket;
+import com.quickpick.ureca.ticket.projection.TicketQuantityProjection;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;

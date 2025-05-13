@@ -1,6 +1,6 @@
-package com.quickpick.ureca.reserve.v1.repository;
+package com.quickpick.ureca.reserve.repository;
 
-import com.quickpick.ureca.reserve.v1.domain.Reserve;
+import com.quickpick.ureca.reserve.domain.Reserve;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

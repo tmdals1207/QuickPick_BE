@@ -1,6 +1,6 @@
-package com.quickpick.ureca.userticket.v1.domain;
+package com.quickpick.ureca.userticket.domain;
 
-import com.quickpick.ureca.ticket.v1.domain.Ticket;
+import com.quickpick.ureca.ticket.domain.Ticket;
 import com.quickpick.ureca.user.domain.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

@@ -1,24 +1,6 @@
 package com.quickpick.ureca.v1;
 
-import com.quickpick.ureca.reserve.v1.service.ReserveServiceV1;
-import com.quickpick.ureca.ticket.v1.domain.Ticket;
-import com.quickpick.ureca.ticket.v1.repository.TicketRepositoryV1;
-import com.quickpick.ureca.user.domain.User;
-import com.quickpick.ureca.user.repository.UserRepository;
-import com.quickpick.ureca.user.v1.service.UserBulkInsertServiceV1;
-import com.quickpick.ureca.userticket.v1.domain.UserTicket;
-import com.quickpick.ureca.userticket.v1.repository.UserTicketRepository;
-
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

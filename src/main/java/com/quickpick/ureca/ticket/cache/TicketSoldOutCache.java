@@ -1,4 +1,4 @@
-package com.quickpick.ureca.ticket.v1.cache;
+package com.quickpick.ureca.ticket.cache;
 
 import org.springframework.stereotype.Component;
 

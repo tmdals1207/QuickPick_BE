@@ -1,6 +1,6 @@
-package com.quickpick.ureca.reserve.v1.dto;
+package com.quickpick.ureca.reserve.dto;
 
-import com.quickpick.ureca.ticket.v1.domain.Ticket;
+import com.quickpick.ureca.ticket.domain.Ticket;
 import com.quickpick.ureca.user.domain.User;
 
 public record TicketReserveResponse(

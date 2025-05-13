@@ -1,6 +1,6 @@
-package com.quickpick.ureca.userticket.v1.repository;
+package com.quickpick.ureca.userticket.repository;
 
-import com.quickpick.ureca.userticket.v1.domain.UserTicket;
+import com.quickpick.ureca.userticket.domain.UserTicket;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

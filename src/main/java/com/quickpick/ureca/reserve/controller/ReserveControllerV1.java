@@ -1,6 +1,6 @@
-package com.quickpick.ureca.reserve.v1.controller;
+package com.quickpick.ureca.reserve.controller;
 
-import com.quickpick.ureca.reserve.v1.service.ReserveServiceV1;
+import com.quickpick.ureca.reserve.service.ReserveServiceV1;
 import com.quickpick.ureca.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

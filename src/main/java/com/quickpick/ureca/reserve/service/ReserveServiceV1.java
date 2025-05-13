@@ -1,14 +1,13 @@
-package com.quickpick.ureca.reserve.v1.service;
+package com.quickpick.ureca.reserve.service;
 
-import com.quickpick.ureca.ticket.v1.cache.TicketSoldOutCache;
-import com.quickpick.ureca.ticket.v1.domain.Ticket;
-import com.quickpick.ureca.ticket.v1.projection.TicketQuantityProjection;
-import com.quickpick.ureca.ticket.v1.repository.TicketRepositoryV1;
+import com.quickpick.ureca.ticket.cache.TicketSoldOutCache;
+import com.quickpick.ureca.ticket.domain.Ticket;
+import com.quickpick.ureca.ticket.repository.TicketRepositoryV1;
 import com.quickpick.ureca.user.domain.User;
 import com.quickpick.ureca.user.repository.UserRepository;
-import com.quickpick.ureca.userticket.v1.domain.UserTicket;
-import com.quickpick.ureca.userticket.v1.repository.UserTicketRepository;
-import com.quickpick.ureca.userticket.v1.repository.UserTicketShardingRepository;
+import com.quickpick.ureca.userticket.domain.UserTicket;
+import com.quickpick.ureca.userticket.repository.UserTicketRepository;
+import com.quickpick.ureca.userticket.repository.UserTicketShardingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -117,7 +116,7 @@ public class ReserveServiceV1 {
 
 
     // 4.
-    // 티켓 예약 메서드 (비관적 락 + 중복방지 + 인덱스 + 네이티브 쿼리) Average : 12846, Throughput : 293.7/sec
+    // 티켓 예약 메서드 (비관적 락 + 중복방지 + 인덱스 + 네이티브 쿼리) Average : 9734, Throughput : 339.2/sec
 //    @Transactional
 //    public void reserveTicket(Long userId, Long ticketId) {
 //
@@ -144,7 +143,7 @@ public class ReserveServiceV1 {
 //    }
 
     // 5.
-    // 티켓 예약 메서드 (비관적 락 + 중복방지 + open-in-view(True) + Projection + 네이티브 쿼리) Average : 11248, Throughput : 320.5/sec
+    // 티켓 예약 메서드 (비관적 락 + 중복방지 + open-in-view(True) + 인덱스 + Projection + 네이티브 쿼리) Average : 12094, Throughput : 339.1/sec
     // 티켓 예약 메서드 (비관적 락 + 중복방지 + open-in-view(False) + Projection + 네이티브 쿼리) Average : 13033, Throughput : 293.7/sec
 //    @Transactional
 //    public void reserveTicket(Long userId, Long ticketId) {

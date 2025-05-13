@@ -1,7 +1,7 @@
 package com.quickpick.ureca.common.init;
 
-import com.quickpick.ureca.ticket.v1.domain.Ticket;
-import com.quickpick.ureca.ticket.v1.repository.TicketRepositoryV1;
+import com.quickpick.ureca.ticket.domain.Ticket;
+import com.quickpick.ureca.ticket.repository.TicketRepositoryV1;
 import com.quickpick.ureca.user.domain.User;
 import com.quickpick.ureca.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

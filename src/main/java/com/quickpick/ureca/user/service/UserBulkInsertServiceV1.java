@@ -1,4 +1,4 @@
-package com.quickpick.ureca.user.v1.service;
+package com.quickpick.ureca.user.service;
 
 import com.quickpick.ureca.user.domain.User;
 import jakarta.persistence.EntityManager;

@@ -1,6 +1,6 @@
-package com.quickpick.ureca.userticket.v1.repository;
+package com.quickpick.ureca.userticket.repository;
 
-import com.quickpick.ureca.userticket.v1.domain.UserTicket;
+import com.quickpick.ureca.userticket.domain.UserTicket;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
