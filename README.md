@@ -1,5 +1,7 @@
-# 🎯 Branch Convention & Git Convention
-## 🎯 Git Convention
+# 🎟️ 동시성 환경에서 티켓 예약 시스템 테스트
+
+## 🎯 Branch Convention & Git Convention
+### 🎯 Git Convention
 - 🎉 **Start:** Start New Project [:tada]
 - ✨ **Feat:** 새로운 기능을 추가 [:sparkles]
 - 🐛 **Fix:** 버그 수정 [:bug]
@@ -14,7 +16,7 @@
 - 🚚 **Rename:** 파일 혹은 폴더명을 수정하거나 옮기는 작업만인 경우 [:truck]
 - 🔥 **Remove:** 파일을 삭제하는 작업만 수행한 경우 [:fire]
 - ⏪️ **Revert:** 전 버전으로 롤백 [:rewind]
-## 🪴 Branch Convention (GitHub Flow)
+### 🪴 Branch Convention (GitHub Flow)
 - `main`: 배포 가능한 브랜치, 항상 배포 가능한 상태를 유지
 - `feature/{description}`: 새로운 기능을 개발하는 브랜치
     - 예: `feature/add-login-page`
