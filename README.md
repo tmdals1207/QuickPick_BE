@@ -36,3 +36,16 @@ git pull origin main
 git merge feature/add-login-page
 git push origin main
 ```
+
+    
+[TEST 1. 어떠한 설정도 추가하지 않고 실행](https://www.notion.so/TEST-1-1ebec761786c8023a9faff1ec04e8c1f)
+
+[TEST 2. DB 락 + 벌크 Insert를 이용한 동시성 제어 및 Insert 성능 향상](https://www.notion.so/TEST-2-DB-Insert-Insert-1e6ec761786c80128c7cf624e6d98673?pvs=21)
+
+[TEST 3. open-in-view 설정을 통한 DB 커넥션 조절](https://www.notion.so/TEST-3-open-in-view-DB-1ebec761786c80de82d1e396d3b0f8a6?pvs=21)
+
+[TEST 4. `비관적 락 + 중복방지 + 인덱스 + 네이티브 쿼리`](https://www.notion.so/TEST-4-1ecec761786c8086aa9fe934604bc009?pvs=21)
+
+[TEST 5. `Projection을 사용하여 성능 개선하기`](https://www.notion.so/TEST-5-Projection-1f2ec761786c80e2a1e4fc6836cfd051?pvs=21)
+
+[TEST 6. `In-Memory 캐시 + Sharding`을 사용한 성능 최적화](https://www.notion.so/TEST-6-In-Memory-Sharding-1f2ec761786c80c59adcd9f65a793b66?pvs=21)
